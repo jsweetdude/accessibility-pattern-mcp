@@ -1,0 +1,1 @@
+console.log("Accessibility Pattern MCP Server starting...");
