@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { startMcpServer } from "./mcp/server";
 
 startMcpServer().catch((err) => {

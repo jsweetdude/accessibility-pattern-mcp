@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export type AppConfig = {
   /**
@@ -13,20 +14,36 @@ export type AppConfig = {
   cacheTtlSeconds: number;
 };
 
+// Resolve a stable project root regardless of how the server is launched.
+// Works for both `src/` (dev) and `dist/` (build) execution.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "..");
+
 /**
  * Reads configuration from environment variables.
- * Beginner note: process.env is how Node reads env vars.
  */
 export function getConfig(): AppConfig {
-  // You can set this in your terminal:
-  // PATTERN_REPO_PATH=../accessibility-pattern-api npm run dev
-  const repoPathFromEnv = process.env.PATTERN_REPO_PATH ?? "../../Accessibility_Pattern_API/accessibility-pattern-api";
+  // Default relative path (from MCP repo root)
+  const repoPathFromEnv =
+    process.env.PATTERN_REPO_PATH ??
+    "../Accessibility_Pattern_API/accessibility-pattern-api";
 
-  // Convert it to an absolute path so the rest of the app is consistent.
-  const patternRepoPath = path.resolve(process.cwd(), repoPathFromEnv);
+  // If absolute path provided, use it directly.
+  // Otherwise resolve relative to PROJECT_ROOT (not process.cwd()).
+  const patternRepoPath = path.isAbsolute(repoPathFromEnv)
+    ? repoPathFromEnv
+    : path.resolve(PROJECT_ROOT, repoPathFromEnv);
 
-  // Keep this simple for v1.
-  const cacheTtlSeconds = 60 * 60; // 1 hour
+  // Optional override from env
+  const cacheTtlSeconds =
+    process.env.CACHE_TTL_SECONDS
+      ? Number(process.env.CACHE_TTL_SECONDS)
+      : 60 * 60; // 1 hour default
+
+  // Helpful startup debug (safe — goes to stderr)
+  console.error("[config] patternRepoPath:", patternRepoPath);
+  console.error("[config] cacheTtlSeconds:", cacheTtlSeconds);
 
   return { patternRepoPath, cacheTtlSeconds };
 }
