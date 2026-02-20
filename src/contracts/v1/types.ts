@@ -24,6 +24,26 @@
 export type StackRef = "web/react" | "android/compose";
 
 /**
+ * Canonical scope buckets for rules.
+ * Use this when tagging a rule by where it applies
+ * (utility-level guidance up to full page concerns).
+ */
+export type RuleScope = "utility" | "style" | "component" | "layout" | "page";
+
+/**
+ * Optional targeting metadata describing which UI contexts
+ * a rule or pattern is meant to cover.
+ * - roles: ARIA/semantic roles (e.g. "button", "dialog")
+ * - controls: concrete control types (e.g. "text input", "combobox")
+ * - surfaces: larger UI regions (e.g. "modal", "navigation", "form")
+ */
+export type AppliesTo = {
+  roles: string[];
+  controls: string[];
+  surfaces: string[];
+};
+
+/**
  * Common caching metadata added to every response.
  * - catalog_revision: a fingerprint (hash) of the repo state
  * - cache_ttl_seconds: how long clients can cache this response
@@ -71,7 +91,7 @@ export type CodeSnippet = {
 export type GlobalRule = {
   id: string; // from the YAML fence inside the rule
   title: string; // from "## Rule: Page Title"
-  scope: string[]; // from YAML: scope: [page, layout]
+  scope: RuleScope[]; // from YAML: scope: [page, layout]
   must_haves: string[];
   donts: string[];
   acceptance_checks: string[];
@@ -89,6 +109,8 @@ export type PatternSummary = {
   summary: string;
   tags: string[];
   aliases: string[];
+  primary_scope?: RuleScope;
+  applies_to?: AppliesTo;
 };
 
 /**

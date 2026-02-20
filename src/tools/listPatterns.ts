@@ -33,6 +33,8 @@ export function listPatterns(index: PatternIndex, args: ListPatternsArgs): ListP
     });
   }
 
+  results = [...results].sort((a, b) => a.id.localeCompare(b.id));
+
   return {
     contract_version: "1.0",
     stack,
