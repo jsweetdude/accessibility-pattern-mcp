@@ -16,12 +16,12 @@
  */
 
 /**
- * For v1, we only support one stack: "web/react".
+ * MVP supports two stacks: "web/react" and "android/compose".
  * This type ensures we don't accidentally pass "web/raect" (typo) etc.
  *
- * Later, you can expand this to: "ios/swiftui" | "android/compose" | ...
+ * Later, you can expand this to: "ios/swiftui" | ...
  */
-export type StackRef = "web/react";
+export type StackRef = "web/react" | "android/compose";
 
 /**
  * Common caching metadata added to every response.

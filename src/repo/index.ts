@@ -35,13 +35,6 @@ export async function buildPatternIndex(
 ): Promise<PatternIndex> {
     const { baselinePath, catalogPath, componentsGlob } = getRepoPaths(patternRepoPath, stack);
 
-    console.log("[debug] baselinePath:", baselinePath);
-    console.log("[debug] catalogPath:", catalogPath);
-    console.log("[debug] componentsGlob:", componentsGlob);
-
-    console.log("[debug] fileExists(baselinePath):", await fileExists(baselinePath));
-    console.log("[debug] fileExists(catalogPath):", await fileExists(catalogPath));
-
     // Validate required files exist (helpful beginner-friendly errors)
     if (!(await fileExists(baselinePath))) {
         throw new Error(`Missing baseline file: ${baselinePath}`);
@@ -51,10 +44,6 @@ export async function buildPatternIndex(
     }
 
     const componentPaths = await fg(componentsGlob, { onlyFiles: true, unique: true });
-    console.log("[debug] componentPaths found:", componentPaths.length);
-    if (componentPaths.length > 0) {
-        console.log("[debug] first component path:", componentPaths[0]);
-    }
 
     // Read important files for revision hashing
     const baselineText = await readTextFile(baselinePath);
@@ -91,6 +80,7 @@ export async function buildPatternIndex(
         const data = parsed.data as Record<string, unknown>;
 
         const id = String(data.id ?? "").trim();
+        const declaredStack = String(data.stack ?? "").trim();
         const status = String(data.status ?? "").trim() as PatternStatus;
         const summary = String(data.summary ?? "").trim();
 
@@ -99,6 +89,11 @@ export async function buildPatternIndex(
 
         if (!id) {
             throw new Error(`Pattern missing 'id' in frontmatter: ${filePath}`);
+        }
+        if (declaredStack && declaredStack !== stack) {
+            throw new Error(
+                `Pattern ${id} declares stack=${declaredStack} but is located under stack=${stack}`
+            );
         }
         if (!summary) {
             throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
