@@ -57,11 +57,13 @@ export type PatternSummary = {
  * This makes the content deterministic for AI consumption.
  */
 export type PatternSections = {
-  golden_pattern_markdown: string | null;
-  must_haves: string[];
-  donts: string[];
-  acceptance_checks: string[];
-  raw_markdown: string;
+    use_when: string[];
+    do_not_use_when: string[];
+    must_haves: string[];
+    customizable: string[];
+    donts: string[];
+    golden_pattern_markdown: string | null;
+    raw_markdown: string;
 };
 
 /**

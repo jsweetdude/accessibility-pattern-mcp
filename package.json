@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jsweetdude/accessibility-pattern-mcp#readme",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3"
   },
