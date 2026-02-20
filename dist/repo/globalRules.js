@@ -147,20 +147,47 @@ function splitByH3(markdown) {
 function toBullets(sectionMarkdown) {
     if (!sectionMarkdown)
         return [];
-    const lines = sectionMarkdown.split("\n").map((l) => l.trim());
+    const lines = sectionMarkdown.replace(/\r\n/g, "\n").split("\n");
     const items = [];
-    for (const line of lines) {
-        const dash = line.match(/^[-*]\s+(.*)$/);
-        if (dash) {
-            items.push(dash[1].trim());
+    let current = null;
+    let nested = [];
+    function flushCurrent() {
+        if (!current)
+            return;
+        if (nested.length > 0) {
+            items.push(`${current}\n${nested.map((n) => `  - ${n}`).join("\n")}`);
+        }
+        else {
+            items.push(current);
+        }
+        current = null;
+        nested = [];
+    }
+    for (const rawLine of lines) {
+        const line = rawLine.replace(/\t/g, "  ");
+        const trimmed = line.trim();
+        if (!trimmed)
+            continue;
+        // One-level nested bullets must be handled before top-level matching.
+        const nestedMatch = line.match(/^\s{2,}[-*]\s+(.*)$/);
+        if (nestedMatch && current) {
+            nested.push(nestedMatch[1].trim());
             continue;
         }
-        const num = line.match(/^\d+\.\s+(.*)$/);
-        if (num) {
-            items.push(num[1].trim());
+        // Top-level bullets start at column 0.
+        const topDash = line.match(/^[-*]\s+(.*)$/);
+        const topNum = line.match(/^\d+\.\s+(.*)$/);
+        if (topDash || topNum) {
+            flushCurrent();
+            current = (topDash?.[1] ?? topNum?.[1] ?? "").trim();
             continue;
+        }
+        // Wrapped text continues the active top-level bullet.
+        if (current) {
+            current = `${current} ${trimmed}`.trim();
         }
     }
+    flushCurrent();
     return items;
 }
 /**
