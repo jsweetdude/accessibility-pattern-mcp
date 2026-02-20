@@ -8,7 +8,6 @@ import { StackRef, GetPatternResponse, PatternStatus, PatternDetail } from "../c
 export type GetPatternArgs = {
   stack: StackRef;
   id: string;
-  include_raw_markdown?: boolean;
 };
 
 export async function getPattern(
@@ -54,9 +53,7 @@ export async function getPattern(
 
   if (!summary) throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
 
-  const sections = extractSections(parsed.content, {
-    includeRawMarkdown: args.include_raw_markdown,
-  });
+  const sections = extractSections(parsed.content);
 
   const detail: PatternDetail = {
     id,

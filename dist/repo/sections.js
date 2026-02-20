@@ -20,7 +20,7 @@ const HEADING_TO_KEY = {
     "customizable": "customizable",
     "don'ts": "donts",
     "donts": "donts",
-    "golden pattern": "golden_pattern_markdown",
+    "golden pattern": "golden_pattern",
 };
 /**
  * Extract sections from markdown (content without frontmatter).
@@ -36,8 +36,7 @@ function extractSections(markdownBody) {
         must_haves: [],
         customizable: [],
         donts: [],
-        golden_pattern_markdown: null,
-        raw_markdown: normalized.trim(),
+        golden_pattern: null,
     };
     // Split by headings like: ## Something
     // We keep the heading text so we know where each chunk belongs.
@@ -56,8 +55,8 @@ function extractSections(markdownBody) {
     out.customizable = toBulletArray(rawByKey.customizable);
     out.donts = toBulletArray(rawByKey.donts);
     // Golden Pattern is special: keep markdown as-is (often code fences)
-    const golden = (rawByKey.golden_pattern_markdown ?? "").trim();
-    out.golden_pattern_markdown = golden.length > 0 ? golden : null;
+    const golden = (rawByKey.golden_pattern ?? "").trim();
+    out.golden_pattern = golden.length > 0 ? golden : null;
     return out;
 }
 /**

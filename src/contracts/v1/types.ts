@@ -87,7 +87,6 @@ export type PatternSections = {
     customizable: string[];
     donts: string[];
     golden_pattern: string | null;
-    raw_markdown?: string;
 };
 
 /**
@@ -118,10 +117,8 @@ export type PatternDetail = PatternSummary & {
 export type GetGlobalRulesResponse = CacheMeta & {
   contract_version: "1.0";
   stack: StackRef;
-  meta: GlobalRulesMeta;
-  rules: {
-    raw_markdown?: string;
-  };
+  meta?: GlobalRulesMeta;
+  rules: Record<string, never>;
 };
 
 export type ListPatternsResponse = CacheMeta & {

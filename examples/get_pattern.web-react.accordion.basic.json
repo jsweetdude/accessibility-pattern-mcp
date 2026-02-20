@@ -15,8 +15,7 @@
         "must_haves": ["Each trigger is a button with aria-expanded reflecting state."],
         "customizable": [],
         "donts": ["Don’t use divs with click handlers without keyboard support."],
-        "golden_pattern_markdown": "```tsx\n// ...example code...\n```",
-        "raw_markdown": "## Use when\n- ...\n"
+        "golden_pattern": "```tsx\n// ...example code...\n```"
       },
       "source": {
         "relative_path": "patterns/web/react/components/accordion/basic.md"
