@@ -37,7 +37,12 @@ const HEADING_TO_KEY: Record<string, keyof ParsedSections> = {
 export function extractSections(
     markdownBody: string
 ): ParsedSections {
-    const normalized = markdownBody.replace(/\r\n/g, "\n");
+    const normalized = markdownBody
+  .replace(/\r\n/g, "\n")
+  // normalize non-breaking spaces to regular spaces
+  .replace(/\u00A0/g, " ")
+  // normalize curly apostrophes to ASCII apostrophe
+  .replace(/[’‘]/g, "'");
 
     // We’ll build up sections as raw markdown chunks first.
     const rawByKey: Partial<Record<keyof ParsedSections, string>> = {};
@@ -57,8 +62,13 @@ export function extractSections(
     const parts = splitByH2(normalized);
 
     for (const part of parts) {
-        const heading = part.heading?.trim().toLowerCase() ?? "";
-        const key = HEADING_TO_KEY[heading];
+        const heading = (part.heading ?? "")
+  .replace(/\u00A0/g, " ")
+  .replace(/[’‘]/g, "'")
+  .trim()
+  .toLowerCase()
+  .replace(/[:.]+$/, ""); // tolerate "Golden Pattern:" style
+const key = HEADING_TO_KEY[heading];
         if (!key) continue;
 
         rawByKey[key] = (part.body ?? "").trim();
@@ -99,7 +109,7 @@ function splitByH2(markdown: string): Array<{ heading: string | null; body: stri
     }
 
     for (const line of lines) {
-        const match = line.match(/^##\s+(.*)$/);
+        const match = line.match(/^##[ \t\u00A0]+(.*)$/);
         if (match) {
             // New section begins
             pushCurrent();

@@ -27,7 +27,25 @@ export async function getPattern(
   }
 
   const raw = await readTextFile(filePath);
+
+  console.error("[get_pattern] file path:", filePath);
+console.error("[get_pattern] fileText length:", raw.length);
+console.error("[get_pattern] has Golden Pattern heading:", raw.includes("## Golden Pattern"));
+console.error("[get_pattern] has ToastProvider:", raw.includes("export function ToastProvider"));
+
   const parsed = matter(raw);
+
+  const goldenLine = parsed.content
+  .split("\n")
+  .find((l) => /golden/i.test(l));
+console.error("[get_pattern] line containing 'golden':", JSON.stringify(goldenLine));
+
+  console.error("[get_pattern] parsed.content length:", parsed.content.length);
+  console.error("[get_pattern] content has Golden Pattern heading:", parsed.content.includes("## Golden Pattern"));
+  console.error("[get_pattern] content has Acceptance Checks heading:", parsed.content.includes("## Acceptance Checks"));
+  console.error("[get_pattern] content has ToastProvider:", parsed.content.includes("export function ToastProvider"));
+  
+  
   const data = parsed.data as Record<string, unknown>;
 
   // Frontmatter fields (strict enough for v1)
@@ -54,6 +72,10 @@ export async function getPattern(
   if (!summary) throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
 
   const sections = extractSections(parsed.content);
+
+  console.error("[get_pattern] extracted golden_pattern is null:", sections.golden_pattern === null);
+console.error("[get_pattern] extracted golden_pattern length:", sections.golden_pattern?.length ?? 0);
+
 
   const detail: PatternDetail = {
     id,

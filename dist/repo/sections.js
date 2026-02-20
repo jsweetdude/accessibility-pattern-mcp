@@ -27,7 +27,12 @@ const HEADING_TO_KEY = {
  * Extract sections from markdown (content without frontmatter).
  */
 function extractSections(markdownBody) {
-    const normalized = markdownBody.replace(/\r\n/g, "\n");
+    const normalized = markdownBody
+        .replace(/\r\n/g, "\n")
+        // normalize non-breaking spaces to regular spaces
+        .replace(/\u00A0/g, " ")
+        // normalize curly apostrophes to ASCII apostrophe
+        .replace(/[’‘]/g, "'");
     // We’ll build up sections as raw markdown chunks first.
     const rawByKey = {};
     // Default output
@@ -43,7 +48,12 @@ function extractSections(markdownBody) {
     // We keep the heading text so we know where each chunk belongs.
     const parts = splitByH2(normalized);
     for (const part of parts) {
-        const heading = part.heading?.trim().toLowerCase() ?? "";
+        const heading = (part.heading ?? "")
+            .replace(/\u00A0/g, " ")
+            .replace(/[’‘]/g, "'")
+            .trim()
+            .toLowerCase()
+            .replace(/[:.]+$/, ""); // tolerate "Golden Pattern:" style
         const key = HEADING_TO_KEY[heading];
         if (!key)
             continue;
@@ -78,7 +88,7 @@ function splitByH2(markdown) {
         result.push({ heading: currentHeading, body: currentBody.join("\n") });
     }
     for (const line of lines) {
-        const match = line.match(/^##\s+(.*)$/);
+        const match = line.match(/^##[ \t\u00A0]+(.*)$/);
         if (match) {
             // New section begins
             pushCurrent();
