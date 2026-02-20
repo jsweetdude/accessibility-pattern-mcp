@@ -20,7 +20,7 @@ export type AppConfig = {
 export function getConfig(): AppConfig {
   // You can set this in your terminal:
   // PATTERN_REPO_PATH=../accessibility-pattern-api npm run dev
-  const repoPathFromEnv = process.env.PATTERN_REPO_PATH ?? "../accessibility-pattern-api";
+  const repoPathFromEnv = process.env.PATTERN_REPO_PATH ?? "../../Accessibility_Pattern_API/accessibility-pattern-api";
 
   // Convert it to an absolute path so the rest of the app is consistent.
   const patternRepoPath = path.resolve(process.cwd(), repoPathFromEnv);

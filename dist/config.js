@@ -12,7 +12,7 @@ const node_path_1 = __importDefault(require("node:path"));
 function getConfig() {
     // You can set this in your terminal:
     // PATTERN_REPO_PATH=../accessibility-pattern-api npm run dev
-    const repoPathFromEnv = process.env.PATTERN_REPO_PATH ?? "../accessibility-pattern-api";
+    const repoPathFromEnv = process.env.PATTERN_REPO_PATH ?? "../../Accessibility_Pattern_API/accessibility-pattern-api";
     // Convert it to an absolute path so the rest of the app is consistent.
     const patternRepoPath = node_path_1.default.resolve(process.cwd(), repoPathFromEnv);
     // Keep this simple for v1.
