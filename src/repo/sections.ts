@@ -26,6 +26,7 @@ const HEADING_TO_KEY: Record<string, keyof ParsedSections> = {
     "must haves": "must_haves",
     "customizable": "customizable",
     "don'ts": "donts",
+    "don’ts": "donts",
     "donts": "donts",
     "golden pattern": "golden_pattern",
 };
