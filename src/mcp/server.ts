@@ -77,11 +77,9 @@ export async function startMcpServer() {
       },
     },
     async (args) => {
-      console.error("[MCP] get_global_rules called with args:", args);
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
       const resp = await getGlobalRules(index, config.patternRepoPath, { stack });
-      console.error("[MCP] returning", resp.rules.items.length, "rules");
       return {
         content: [{ type: "text", text: JSON.stringify(resp, null, 2) }],
       };
@@ -92,5 +90,4 @@ export async function startMcpServer() {
   await server.connect(transport);
 
   // Keep process alive (stdio transport)
-  console.error("MCP server running on stdio ✅");
 }

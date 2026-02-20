@@ -37,7 +37,6 @@ function parseGlobalRulesMarkdown(fileText, expectedStack) {
     // ---- Parse rules ----
     // Your format uses: "## Rule: XYZ" ... then a fenced yaml block with id + scope ... then ### sections.
     const ruleBlocks = splitByH2Rule(body);
-    console.error("[globalRules] rule blocks found:", ruleBlocks.length);
     const rules = ruleBlocks.map((block) => parseOneRule(block));
     // Deterministic ordering: by id
     rules.sort((a, b) => a.id.localeCompare(b.id));
@@ -75,7 +74,6 @@ function splitByH2Rule(markdown) {
  * Parse a single rule block into a deterministic GlobalRule object.
  */
 function parseOneRule(block) {
-    console.error("[globalRules] parsing rule:", block.title);
     const { title, body } = block;
     // 1) Extract the first fenced yaml block: ```yaml ... ```
     const yamlFence = firstFencedBlock(body, "yaml");
