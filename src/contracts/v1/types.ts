@@ -63,6 +63,21 @@ export type GlobalRulesMeta = {
   apply_policy?: ApplyPolicy;
 };
 
+export type CodeSnippet = {
+  language: string; // e.g. "css", "tsx", "yaml"
+  code: string;
+};
+
+export type GlobalRule = {
+  id: string; // from the YAML fence inside the rule
+  title: string; // from "## Rule: Page Title"
+  scope: string[]; // from YAML: scope: [page, layout]
+  must_haves: string[];
+  donts: string[];
+  acceptance_checks: string[];
+  snippets?: CodeSnippet[];
+};
+
 /**
  * This is the SMALL pattern object returned from list_patterns().
  * It's intentionally tiny so the assistant can scan many patterns quickly.
@@ -117,8 +132,10 @@ export type PatternDetail = PatternSummary & {
 export type GetGlobalRulesResponse = CacheMeta & {
   contract_version: "1.0";
   stack: StackRef;
-  meta?: GlobalRulesMeta;
-  rules: Record<string, never>;
+  meta: GlobalRulesMeta;
+  rules: {
+    items: GlobalRule[];
+  }
 };
 
 export type ListPatternsResponse = CacheMeta & {
