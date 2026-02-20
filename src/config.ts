@@ -1,5 +1,4 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 export type AppConfig = {
   /**
@@ -16,8 +15,6 @@ export type AppConfig = {
 
 // Resolve a stable project root regardless of how the server is launched.
 // Works for both `src/` (dev) and `dist/` (build) execution.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 
 /**
