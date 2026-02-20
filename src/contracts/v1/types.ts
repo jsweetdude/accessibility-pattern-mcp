@@ -40,6 +40,30 @@ export type CacheMeta = {
 export type PatternStatus = "alpha" | "beta" | "stable" | "deprecated";
 
 /**
+ * Optional execution guidance for clients consuming global rules.
+ * - instruction: natural-language direction for how to apply the rules
+ * - scopes_in_order: preferred precedence order for rule scopes
+ */
+export type ApplyPolicy = {
+  instruction?: string;
+  scopes_in_order?: string[];
+};
+
+/**
+ * Metadata for get_global_rules() responses.
+ * This describes the rule set identity, lifecycle status, and caching/apply hints.
+ */
+export type GlobalRulesMeta = {
+  id: string;
+  stack: StackRef;
+  rule_set?: string;
+  status?: PatternStatus;
+  summary?: string;
+  cache_ttl_seconds?: number;
+  apply_policy?: ApplyPolicy;
+};
+
+/**
  * This is the SMALL pattern object returned from list_patterns().
  * It's intentionally tiny so the assistant can scan many patterns quickly.
  */
@@ -62,8 +86,8 @@ export type PatternSections = {
     must_haves: string[];
     customizable: string[];
     donts: string[];
-    golden_pattern_markdown: string | null;
-    raw_markdown: string;
+    golden_pattern: string | null;
+    raw_markdown?: string;
 };
 
 /**
@@ -94,8 +118,9 @@ export type PatternDetail = PatternSummary & {
 export type GetGlobalRulesResponse = CacheMeta & {
   contract_version: "1.0";
   stack: StackRef;
+  meta: GlobalRulesMeta;
   rules: {
-    raw_markdown: string;
+    raw_markdown?: string;
   };
 };
 
