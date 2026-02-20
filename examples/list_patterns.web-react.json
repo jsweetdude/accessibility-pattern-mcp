@@ -1,0 +1,17 @@
+{
+    "contract_version": "1.0",
+    "stack": "web/react",
+    "catalog_revision": "sha256:REPLACE_WITH_REAL",
+    "cache_ttl_seconds": 3600,
+    "count": 2,
+    "patterns": [
+      {
+        "id": "accordion.basic",
+        "stack": "web/react",
+        "status": "beta",
+        "summary": "A set of show/hide sections with heading-wrapped buttons controlling associated panels via aria-expanded.",
+        "tags": ["accordion", "disclosure", "show-hide"],
+        "aliases": ["accordion", "disclosure group", "expand collapse", "collapsible panels"]
+      }
+    ]
+  }

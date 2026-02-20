@@ -1,0 +1,25 @@
+{
+    "contract_version": "1.0",
+    "catalog_revision": "sha256:REPLACE_WITH_REAL",
+    "cache_ttl_seconds": 3600,
+    "pattern": {
+      "id": "accordion.basic",
+      "stack": "web/react",
+      "status": "beta",
+      "summary": "A set of show/hide sections with heading-wrapped buttons controlling associated panels via aria-expanded.",
+      "tags": ["accordion", "disclosure", "show-hide"],
+      "aliases": ["accordion", "disclosure group", "expand collapse", "collapsible panels"],
+      "sections": {
+        "use_when": ["Use when it reveals additional content inline without navigation."],
+        "do_not_use_when": ["Do not use when the change requires form submission to take effect."],
+        "must_haves": ["Each trigger is a button with aria-expanded reflecting state."],
+        "customizable": [],
+        "donts": ["Don’t use divs with click handlers without keyboard support."],
+        "golden_pattern_markdown": "```tsx\n// ...example code...\n```",
+        "raw_markdown": "## Use when\n- ...\n"
+      },
+      "source": {
+        "relative_path": "patterns/web/react/components/accordion/basic.md"
+      }
+    }
+  }
