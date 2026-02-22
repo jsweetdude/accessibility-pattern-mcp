@@ -10,6 +10,7 @@ import {
     PatternStatus,
     PatternSummary,
     StackRef,
+    SelectionExcerpt,
 } from "../contracts/v1/types";
 
 type PatternIndex = {
@@ -23,6 +24,78 @@ type PatternIndex = {
     // Useful if you want later:
     all: PatternSummary[];
 };
+
+function normalizeBullet(s: unknown, maxLen: number): string | null {
+    if (typeof s !== "string") return null;
+    const cleaned = s.replace(/\s+/g, " ").trim();
+    if (!cleaned) return null;
+    return cleaned.length > maxLen ? cleaned.slice(0, maxLen).trimEnd() : cleaned;
+}
+
+function normalizeBulletList(value: unknown, maxItems: number, maxLen: number): string[] {
+    if (!Array.isArray(value)) return [];
+    const out: string[] = [];
+    for (const item of value) {
+        const b = normalizeBullet(item, maxLen);
+        if (b) out.push(b);
+        if (out.length >= maxItems) break;
+    }
+    return out;
+}
+
+function parseSelectionExcerpt(value: unknown): SelectionExcerpt | undefined {
+    if (!value || typeof value !== "object") return undefined;
+    const v = value as Record<string, unknown>;
+
+    const use_when = normalizeBulletList(v.use_when, 3, 140);
+    const do_not_use_when = normalizeBulletList(v.do_not_use_when, 3, 140);
+
+    if (use_when.length === 0 && do_not_use_when.length === 0) return undefined;
+    return { use_when, do_not_use_when };
+}
+
+/**
+ * patterns.json can be shaped a few different ways depending on how you author it.
+ * We support:
+ *  - { patterns: [...] }
+ *  - { items: [...] }
+ *  - [...] (array)
+ */
+function buildCatalogSelectionMap(
+    catalogText: string
+): Map<string, SelectionExcerpt> {
+    const map = new Map<string, SelectionExcerpt>();
+
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(catalogText);
+    } catch {
+        throw new Error("patterns.json is not valid JSON.");
+    }
+
+    const parsedObj = parsed as { patterns?: unknown; items?: unknown } | null;
+    const arr = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsedObj?.patterns)
+          ? parsedObj.patterns
+          : Array.isArray(parsedObj?.items)
+            ? parsedObj.items
+            : null;
+
+    if (!arr) return map;
+
+    for (const entry of arr) {
+        if (!entry || typeof entry !== "object") continue;
+        const entryObj = entry as { id?: unknown; selection_excerpt?: unknown };
+        const id = typeof entryObj.id === "string" ? entryObj.id.trim() : "";
+        if (!id) continue;
+
+        const excerpt = parseSelectionExcerpt(entryObj.selection_excerpt);
+        if (excerpt) map.set(id, excerpt);
+    }
+
+    return map;
+}
 
 /**
  * Reads + indexes the content repo once.
@@ -48,6 +121,7 @@ export async function buildPatternIndex(
     // Read important files for revision hashing
     const baselineText = await readTextFile(baselinePath);
     const catalogText = await readTextFile(catalogPath);
+    const selectionById = buildCatalogSelectionMap(catalogText);
 
     // Read all component file text
     const componentTexts: string[] = [];
@@ -80,6 +154,7 @@ export async function buildPatternIndex(
         const data = parsed.data as Record<string, unknown>;
 
         const id = String(data.id ?? "").trim();
+        const selection_excerpt = selectionById.get(id);
         const declaredStack = String(data.stack ?? "").trim();
         const status = String(data.status ?? "").trim() as PatternStatus;
         const summary = String(data.summary ?? "").trim();
@@ -114,6 +189,7 @@ export async function buildPatternIndex(
             summary,
             tags,
             aliases,
+            selection_excerpt,
         };
 
         if (byId.has(id)) {

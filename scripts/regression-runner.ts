@@ -3,10 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert";
 
-// TODO: replace these imports with your actual tool entrypoints once I see your code.
-import { listPatternsTool } from "../src/tools/listPatterns";
-import { getPatternTool } from "../src/tools/getPattern";
-import { getGlobalRulesTool } from "../src/tools/getGlobalRules";
+import { buildPatternIndex } from "../src/repo/index";
+import { listPatterns } from "../src/tools/listPatterns";
+import { getPattern } from "../src/tools/getPattern";
+import { getGlobalRules } from "../src/tools/getGlobalRules";
 
 import {
   deepSortObjectKeys,
@@ -27,71 +27,93 @@ const FIXTURES_DIR = path.join(ROOT, "examples", "fixtures");
 const IGNORE_CACHE_TTL = process.argv.includes("--ignore-cache-ttl");
 const UPDATE = process.argv.includes("--update");
 
+// You can override TTL for index.cache here (tool response TTL can still override from file frontmatter)
+const DEFAULT_INDEX_TTL_SECONDS = Number(process.env.INDEX_CACHE_TTL_SECONDS ?? 86400);
+
 function listFixtureDirs(dir: string): string[] {
-  const out: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(p);
-  }
-  return out;
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => path.join(dir, d.name));
 }
 
-async function runOneFixture(fixtureDir: string) {
+async function buildIndexes(patternRepoPath: string) {
+  const web = await buildPatternIndex(patternRepoPath, "web/react", DEFAULT_INDEX_TTL_SECONDS);
+  const android = await buildPatternIndex(patternRepoPath, "android/compose", DEFAULT_INDEX_TTL_SECONDS);
+  return { web, android };
+}
+
+function pickIndex(indexes: Awaited<ReturnType<typeof buildIndexes>>, stack: string) {
+  if (stack === "web/react") return indexes.web;
+  if (stack === "android/compose") return indexes.android;
+  throw new Error(`Unknown stack '${stack}' in fixture args.`);
+}
+
+async function runOneFixture(
+  fixtureDir: string,
+  indexes: Awaited<ReturnType<typeof buildIndexes>>,
+  patternRepoPath: string
+) {
   const requestPath = path.join(fixtureDir, "request.json");
   const expectedPath = path.join(fixtureDir, "expected.json");
 
   const req = loadJson<FixtureRequest>(requestPath);
 
+  // Most fixtures include args.stack. Enforce it.
+  const stack = req.args?.stack;
+  if (!stack) {
+    throw new Error(`Fixture missing args.stack: ${requestPath}`);
+  }
+
+  const index = pickIndex(indexes, stack);
+
   let actual: any;
   switch (req.tool) {
     case "list_patterns":
-      actual = await listPatternsTool(req.args);
+      actual = listPatterns(index, req.args);
       break;
+
     case "get_pattern":
-      actual = await getPatternTool(req.args);
+      actual = await getPattern(index, patternRepoPath, req.args);
       break;
+
     case "get_global_rules":
-      actual = await getGlobalRulesTool(req.args);
+      actual = await getGlobalRules(index, patternRepoPath, req.args);
       break;
+
     default:
       throw new Error(`Unknown tool in fixture: ${(req as any).tool}`);
   }
 
-  // Shape checks (fail fast)
   validateToolResponseShape(req.tool, actual);
 
-  // Normalize (ignore volatile fields + stable key ordering)
-  const normalized = normalizeForSnapshot(actual, {
-    ignoreCacheTtl: IGNORE_CACHE_TTL,
-  });
-
+  const normalized = normalizeForSnapshot(actual, { ignoreCacheTtl: IGNORE_CACHE_TTL });
   const normalizedSorted = deepSortObjectKeys(normalized);
 
   if (UPDATE) {
     fs.writeFileSync(expectedPath, stableStringify(normalizedSorted) + "\n", "utf8");
-    return { ok: true as const };
+    return;
   }
 
-  const expected = fs.existsSync(expectedPath) ? loadJson<any>(expectedPath) : null;
-
-  if (!expected) {
+  if (!fs.existsSync(expectedPath)) {
     throw new Error(
-      `Missing expected.json for fixture: ${fixtureDir}. Run with --update to create.`
+      `Missing expected.json for fixture: ${fixtureDir}. Run with --update to create snapshots.`
     );
   }
 
+  const expected = loadJson<any>(expectedPath);
   const expectedSorted = deepSortObjectKeys(expected);
 
   try {
     assert.deepStrictEqual(normalizedSorted, expectedSorted);
-    return { ok: true as const };
   } catch {
     const actualStr = stableStringify(normalizedSorted);
     const expectedStr = stableStringify(expectedSorted);
 
-    // Lightweight “diff”: show first mismatch region by line
     const aLines = actualStr.split("\n");
     const eLines = expectedStr.split("\n");
+
     let firstDiff = -1;
     for (let i = 0; i < Math.max(aLines.length, eLines.length); i++) {
       if (aLines[i] !== eLines[i]) {
@@ -117,19 +139,27 @@ async function runOneFixture(fixtureDir: string) {
 }
 
 async function main() {
-  const stacks = listFixtureDirs(FIXTURES_DIR);
-
-  const fixtureDirs: string[] = [];
-  for (const stackDir of stacks) {
-    fixtureDirs.push(...listFixtureDirs(stackDir));
+  const patternRepoPath = process.env.PATTERN_REPO_PATH;
+  if (!patternRepoPath) {
+    throw new Error(
+      `PATTERN_REPO_PATH is required.\n` +
+        `Example:\n` +
+        `  PATTERN_REPO_PATH=/absolute/path/to/accessibility-pattern-api npm run test:regression`
+    );
   }
+
+  const indexes = await buildIndexes(patternRepoPath);
+
+  const stackDirs = listFixtureDirs(FIXTURES_DIR);
+  const fixtureDirs: string[] = [];
+  for (const stackDir of stackDirs) fixtureDirs.push(...listFixtureDirs(stackDir));
 
   let passed = 0;
   let failed = 0;
 
   for (const dir of fixtureDirs) {
     try {
-      await runOneFixture(dir);
+      await runOneFixture(dir, indexes, patternRepoPath);
       passed++;
     } catch (e: any) {
       failed++;

@@ -66,7 +66,7 @@ export type PatternStatus = "alpha" | "beta" | "stable" | "deprecated";
  */
 export type ApplyPolicy = {
   instruction?: string;
-  scopes_in_order?: string[];
+  scopes_in_order?: RuleScope[];
 };
 
 /**
@@ -99,6 +99,16 @@ export type GlobalRule = {
 };
 
 /**
+ * Lightweight "when to use it" preview shown in list_patterns().
+ * This helps clients quickly understand what each component is for
+ * without loading the full pattern detail.
+ */
+export type SelectionExcerpt = {
+  use_when: string[];
+  do_not_use_when: string[];
+};
+
+/**
  * This is the SMALL pattern object returned from list_patterns().
  * It's intentionally tiny so the assistant can scan many patterns quickly.
  */
@@ -109,6 +119,7 @@ export type PatternSummary = {
   summary: string;
   tags: string[];
   aliases: string[];
+  selection_excerpt?: SelectionExcerpt;
   primary_scope?: RuleScope;
   applies_to?: AppliesTo;
 };
@@ -156,6 +167,7 @@ export type GetGlobalRulesResponse = CacheMeta & {
   stack: StackRef;
   meta: GlobalRulesMeta;
   rules: {
+    scope_filter?: RuleScope[] | null;
     items: GlobalRule[];
   }
 };

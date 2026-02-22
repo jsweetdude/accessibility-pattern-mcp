@@ -6,7 +6,6 @@ export function loadJson<T>(filePath: string): T {
   return JSON.parse(raw) as T;
 }
 
-// Stable stringify for snapshots
 export function stableStringify(value: any): string {
   return JSON.stringify(value, null, 2);
 }
@@ -23,7 +22,6 @@ export function deepSortObjectKeys(input: any): any {
   return input;
 }
 
-// Strip volatile fields and enforce a few deterministic normalizations
 export function normalizeForSnapshot(
   input: any,
   opts: { ignoreCacheTtl: boolean }
@@ -46,8 +44,7 @@ export function normalizeForSnapshot(
 }
 
 /**
- * Minimal shape validation (kept intentionally light).
- * Once I see types.ts, I can tighten this to match your exact contracts.
+ * Contract-ish validation (kept minimal, but aligned to your v1 types).
  */
 export function validateToolResponseShape(
   tool: "list_patterns" | "get_pattern" | "get_global_rules",
@@ -57,26 +54,45 @@ export function validateToolResponseShape(
     throw new Error(`Tool response is not an object for ${tool}`);
   }
 
-  // Common contract fields that exist today (based on your description)
-  if (!("stack" in resp)) throw new Error(`Missing 'stack' in ${tool} response`);
+  if (resp.contract_version !== "1.0") {
+    throw new Error(`${tool}: missing/invalid contract_version (expected "1.0")`);
+  }
+
+  // Cache meta present on all responses in your design
+  if (typeof resp.cache_ttl_seconds !== "number") {
+    throw new Error(`${tool}: missing/invalid cache_ttl_seconds`);
+  }
+  if (typeof resp.catalog_revision !== "string") {
+    throw new Error(`${tool}: missing/invalid catalog_revision`);
+  }
 
   switch (tool) {
-    case "list_patterns":
-      if (!Array.isArray(resp.patterns)) {
-        throw new Error(`list_patterns: missing/invalid 'patterns' array`);
-      }
-      // Require stable minimal keys in each PatternSummary
+    case "list_patterns": {
+      if (!("stack" in resp)) throw new Error(`list_patterns: missing 'stack'`);
+      if (!Array.isArray(resp.patterns)) throw new Error(`list_patterns: patterns must be array`);
+      if (typeof resp.count !== "number") throw new Error(`list_patterns: count must be number`);
+
+      // Minimal PatternSummary keys
       for (const p of resp.patterns) {
-        for (const key of ["id", "title", "tags"] as const) {
+        for (const key of ["id", "stack", "status", "summary", "tags", "aliases"] as const) {
           if (!(key in p)) throw new Error(`list_patterns: pattern missing '${key}'`);
         }
         if (!Array.isArray(p.tags)) throw new Error(`list_patterns: tags must be array`);
+        if (!Array.isArray(p.aliases)) throw new Error(`list_patterns: aliases must be array`);
       }
       break;
+    }
 
-    case "get_pattern":
+    case "get_pattern": {
+      if (!resp.pattern || typeof resp.pattern !== "object") {
+        throw new Error(`get_pattern: missing 'pattern' object`);
+      }
+      const p = resp.pattern;
+      for (const key of ["id", "stack", "status", "summary", "tags", "aliases", "sections"] as const) {
+        if (!(key in p)) throw new Error(`get_pattern: pattern missing '${key}'`);
+      }
+      const s = p.sections;
       for (const key of [
-        "id",
         "use_when",
         "do_not_use_when",
         "must_haves",
@@ -84,23 +100,18 @@ export function validateToolResponseShape(
         "donts",
         "golden_pattern",
       ] as const) {
-        if (!(key in resp)) throw new Error(`get_pattern: missing '${key}'`);
+        if (!(key in s)) throw new Error(`get_pattern: sections missing '${key}'`);
       }
-      if (!Array.isArray(resp.customizable)) {
-        throw new Error(`get_pattern: customizable must be array (even if empty)`);
-      }
+      if (!Array.isArray(s.customizable)) throw new Error(`get_pattern: customizable must be array`);
       break;
+    }
 
-    case "get_global_rules":
-      if (!resp.meta || typeof resp.meta !== "object") {
-        throw new Error(`get_global_rules: missing 'meta' object`);
-      }
-      if (!resp.rules || typeof resp.rules !== "object") {
-        throw new Error(`get_global_rules: missing 'rules' object`);
-      }
-      if (!Array.isArray(resp.rules.items)) {
-        throw new Error(`get_global_rules: rules.items must be array`);
-      }
+    case "get_global_rules": {
+      if (!("stack" in resp)) throw new Error(`get_global_rules: missing 'stack'`);
+      if (!resp.meta || typeof resp.meta !== "object") throw new Error(`get_global_rules: missing meta`);
+      if (!resp.rules || typeof resp.rules !== "object") throw new Error(`get_global_rules: missing rules`);
+      if (!Array.isArray(resp.rules.items)) throw new Error(`get_global_rules: rules.items must be array`);
       break;
+    }
   }
 }
