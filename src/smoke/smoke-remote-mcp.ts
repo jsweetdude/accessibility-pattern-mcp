@@ -32,10 +32,6 @@ const listPatternsResult = await client.callTool({
   name: "list_patterns",
   arguments: { stack: "web/react" },
 });
-console.log("TOP-LEVEL KEYS:", Object.keys(listPatternsResult as any));
-console.log("RAW RESULT:", JSON.stringify(listPatternsResult, null, 2));
-const listResult = listPatternsResult;
-console.log("list_patterns full result:", JSON.stringify(listResult, null, 2));
 
 assertHasStructuredContent(listPatternsResult, "list_patterns");
 const listPayload = listPatternsResult.structuredContent as {
@@ -58,21 +54,8 @@ const getPatternResult = await client.callTool({
 });
 assertHasStructuredContent(getPatternResult, "get_pattern");
 
-console.log("list_patterns result keys:", Object.keys(listPatternsResult));
-console.log("get_global_rules result keys:", Object.keys(getGlobalRulesResult));
-console.log("get_pattern result keys:", Object.keys(getPatternResult));
 console.log(
-  "structuredContent checks passed:",
-  JSON.stringify(
-    {
-      list_patterns: true,
-      get_global_rules: true,
-      get_pattern: true,
-      get_pattern_id: firstPatternId,
-    },
-    null,
-    2
-  )
+  `structuredContent check passed (list_patterns, get_global_rules, get_pattern). sample_pattern_id=${firstPatternId}`
 );
 
 process.exit(0);

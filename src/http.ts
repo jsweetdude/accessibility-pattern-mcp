@@ -4,17 +4,9 @@ import express from "express";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
-
-import { StackRef } from "./contracts/v1/types.js";
-import { createIndexCache } from "./repo/cache.js";
-import { getGlobalRules } from "./tools/getGlobalRules.js";
-import { getPattern } from "./tools/getPattern.js";
-import { listPatterns } from "./tools/listPatterns.js";
-import { jsonResult } from "./mcp/response.js";
+import { createMcpServer as createSharedMcpServer } from "./mcp/createServer.js";
 
 function resolvePatternsRoot() {
   // Key fix for prod: avoid machine-specific absolute paths.
@@ -23,89 +15,15 @@ function resolvePatternsRoot() {
   return path.resolve(process.cwd(), rel);
 }
 
-function registerTools(server: McpServer, opts: { patternsRoot: string }) {
-  const cache = createIndexCache({
-    patternRepoPath: opts.patternsRoot,
+function createHttpMcpServer() {
+  return createSharedMcpServer({
+    name: "accessibility-context-mcp",
+    version: process.env.CONTRACT_VERSION ?? "v1",
+    patternsRoot: resolvePatternsRoot(),
     cacheTtlSeconds: process.env.CACHE_TTL_SECONDS
       ? Number(process.env.CACHE_TTL_SECONDS)
       : 60 * 60,
   });
-
-  // Tool: list_patterns
-  server.registerTool(
-    "list_patterns",
-    {
-      description:
-        "List accessible UI patterns for a given stack (optionally filtered by tags/query).",
-      inputSchema: {
-        stack: z.string(),
-        tags: z.array(z.string()).optional(),
-        query: z.string().optional(),
-      },
-    },
-    async (args) => {
-      const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = listPatterns(index, {
-        stack,
-        tags: args.tags as string[] | undefined,
-        query: args.query as string | undefined,
-      });
-      return jsonResult(payload);
-    }
-  );
-
-  // Tool: get_pattern
-  server.registerTool(
-    "get_pattern",
-    {
-      description: "Get a single pattern by id for a given stack.",
-      inputSchema: {
-        stack: z.string(),
-        id: z.string(),
-      },
-    },
-    async (args) => {
-      const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = await getPattern(index, opts.patternsRoot, {
-        stack,
-        id: String(args.id),
-      });
-      return jsonResult(payload);
-    }
-  );
-
-  // Tool: get_global_rules
-  server.registerTool(
-    "get_global_rules",
-    {
-      description: "Get global baseline rules for a given stack.",
-      inputSchema: {
-        stack: z.string(),
-      },
-    },
-    async (args) => {
-      const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = await getGlobalRules(index, opts.patternsRoot, { stack });
-      return jsonResult(payload);
-    }
-  );
-}
-
-function createMcpServer() {
-  const server = new McpServer({
-    name: "accessibility-context-mcp",
-    version: process.env.CONTRACT_VERSION ?? "v1",
-  });
-
-  // Your tools: list_patterns, get_pattern, get_global_rules
-  registerTools(server, {
-    patternsRoot: resolvePatternsRoot(),
-  });
-
-  return server;
 }
 
 function originGuard() {
@@ -162,7 +80,7 @@ async function main() {
         if (transport?.sessionId) delete transports[transport.sessionId];
       };
 
-      const server = createMcpServer();
+      const server = createHttpMcpServer();
       await server.connect(transport);
     } else {
       res.status(400).json({
