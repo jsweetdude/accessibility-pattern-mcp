@@ -14,4 +14,12 @@ const tools = await client.listTools();
 console.log("Connected. Tool count:", tools.tools?.length ?? 0);
 console.log("Tool names:", (tools.tools ?? []).map((t) => t.name));
 
+const result = await client.callTool({
+  name: "list_patterns",
+  arguments: { stack: "web/react" },
+});
+
+console.log("list_patterns result keys:", Object.keys(result));
+console.log("list_patterns raw:", JSON.stringify(result, null, 2));
+
 process.exit(0);
