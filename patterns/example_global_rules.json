@@ -1,0 +1,107 @@
+{
+    "stack": "web/react",
+    "rule_set": "baseline",
+    "catalog_revision": "rev_2026-02-17T18:00:00Z",
+    "cache_ttl_seconds": 86400,
+    "apply_policy": {
+      "instruction": "Apply all MUST rules that match the current change scope. If the current task does not touch a scope, do not introduce unrelated changes.",
+      "scopes_in_order": ["page", "layout", "component", "style", "utility"]
+    },
+    "rules": [
+      {
+        "id": "global.landmarks",
+        "title": "Landmarks",
+        "scope": ["page", "layout"],
+        "must_haves": [
+          "Pages and app shells expose semantic landmarks (e.g., header/banner, primary navigation, main, footer/contentinfo) using semantic elements or equivalent roles.",
+          "Each page has exactly one main landmark.",
+          "Landmarks are not empty and are not used purely for styling."
+        ],
+        "donts": [
+          "Do not create multiple main landmarks on the same page.",
+          "Do not wrap the entire application in nested landmarks that confuse region structure."
+        ],
+        "acceptance_checks": [
+          "With a screen reader, landmark navigation surfaces a single main region and expected major regions (e.g., navigation).",
+          "Page contains exactly one <main> or equivalent role='main'."
+        ]
+      },
+      {
+        "id": "global.page-title",
+        "title": "Page Title",
+        "scope": ["page"],
+        "must_haves": [
+          "Each route/page sets a descriptive document title that reflects the current view."
+        ],
+        "donts": [
+          "Do not leave the document title as a generic placeholder across routes."
+        ],
+        "acceptance_checks": [
+          "Browser tab title changes appropriately when navigating to the page."
+        ]
+      },
+      {
+        "id": "global.headings",
+        "title": "Heading Structure",
+        "scope": ["page", "layout", "component"],
+        "must_haves": [
+          "Headings reflect the content hierarchy and are not chosen for visual styling alone.",
+          "Each page has a primary heading that describes the page (commonly an <h1> on the page)."
+        ],
+        "donts": [
+          "Do not skip heading levels solely to achieve a visual size (use CSS instead).",
+          "Do not use headings for non-heading UI (e.g., button labels)."
+        ],
+        "acceptance_checks": [
+          "Using a headings list, the page structure is navigable and hierarchy is coherent."
+        ]
+      },
+      {
+        "id": "global.sr-only",
+        "title": "Offscreen Text Utility (sr-only)",
+        "scope": ["component", "utility"],
+        "must_haves": [
+          "Provide an offscreen text utility for accessible names when visible text is not present (e.g., icon-only buttons)."
+        ],
+        "donts": [
+          "Do not hide text using display:none or visibility:hidden when it is needed for an accessible name."
+        ],
+        "snippets": [
+          {
+            "id": "snippet.sr-only.css",
+            "title": "sr-only CSS",
+            "language": "css",
+            "code": ".sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}"
+          }
+        ],
+        "acceptance_checks": [
+          "Icon-only controls have a programmatic name (e.g., via aria-label or offscreen text)."
+        ]
+      },
+      {
+        "id": "global.focus-visible",
+        "title": "Focus Visible",
+        "scope": ["component", "style"],
+        "must_haves": [
+          "All keyboard-focusable interactive elements have a visible focus indicator.",
+          "Focus indicators are not removed unless replaced with an equally visible alternative."
+        ],
+        "donts": [
+          "Do not globally remove outlines (e.g., outline: none) without providing a replacement focus style."
+        ],
+        "snippets": [
+          {
+            "id": "snippet.focus-visible.css",
+            "title": "Example focus-visible style",
+            "language": "css",
+            "code": ":where(a,button,input,select,textarea,[tabindex]:not([tabindex=\"-1\"])):focus-visible{outline:2px solid currentColor;outline-offset:2px;}"
+          }
+        ],
+        "acceptance_checks": [
+          "Tab through the UI: focus is always visible on the currently focused element."
+        ]
+      }
+    ]
+  }
+  
+  

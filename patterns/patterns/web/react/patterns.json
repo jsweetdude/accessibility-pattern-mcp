@@ -1,0 +1,285 @@
+{
+  "stack": "web/react",
+  "schema_version": "1.0.0",
+  "catalog_revision": "rev_2026-02-17T18:00:00Z",
+  "generated_at": "2026-02-17T18:00:00Z",
+  "cache_ttl_seconds": 3600,
+
+  "patterns": [
+    {
+      "id": "accordion.basic",
+      "title": "Accordion",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "A set of show/hide sections with heading-wrapped buttons controlling associated panels via aria-expanded (and optionally aria-controls / region).",
+      "aliases": ["accordion", "disclosure group", "expand collapse", "collapsible panels"],
+      "tags": ["accordion", "disclosure", "show-hide"],
+      "selection_excerpt": {
+        "use_when": ["Use when content can be organized into collapsible sections to reduce scanning and scrolling."],
+        "do_not_use_when": ["Do not use when content must be visible for comparison or comprehension (use static, non-collapsing sections instead)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/accordion.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "button.basic",
+      "title": "Basic Button",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Native button that triggers an action. Supports text-only, icon+text, and icon-only labeling patterns.",
+      "aliases": ["btn", "primary button", "icon button", "call to action", "cta"],
+      "tags": ["button", "control", "action", "icon-button"],
+      "selection_excerpt": {
+        "use_when": ["Use when the user triggers an immediate action (e.g., “Save”, “Continue”, “Dismiss”)."],
+        "do_not_use_when": ["Do not use when the control navigates to a new URL (use link).", "Do not use when the control represents an on/off pressed state (use button.toggle).", "Do not use when the control opens a menu (use menu.button)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/button.basic.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "carousel.dots",
+      "title": "Carousel with Dot Navigation",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Horizontally-advancing carousel (aka hero or marquee carousel) with 'dot' navigation, prev/next buttons, and pause behavior.",
+      "aliases": ["hero carousel", "marquee", "featured gallery", "hero gallery", "slider"],
+      "tags": ["marquee", "carousel", "slider", "dots", "autoplay", "reduced-motion"],
+      "selection_excerpt": {
+        "use_when": ["Use when slides are navigated sequentially using next/previous controls or dot indicators.", "Use when dot buttons indicate slide position but do not display image previews."],
+        "do_not_use_when": ["Do not use when thumbnail images are shown for direct slide selection (use carousel.thumbnails).", "Do not use when multiple slides are visible at once in a horizontal list (use content-shelf)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/carousel.dots.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "carousel.thumbnails",
+      "title": "Carousel with Thumbnail Navigation",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Horizontally-advancing carousel (aka hero or marquee carousel) with thumbnail navigation, prev/next buttons, and pause behavior.",
+      "aliases": ["hero carousel thumbnails", "marquee thumbnails", "featured gallery thumbnails", "hero gallery thumbnails", "preview carousel"],
+      "tags": ["marquee", "carousel", "slider", "thumbnails", "autoplay", "reduced-motion", "image-preview"],
+      "selection_excerpt": {
+        "use_when": ["Use when thumbnail images are displayed for direct slide selection.", "Use when users can identify slide content from visible preview images before activating a slide.", "Use when thumbnails act as explicit navigation controls for specific slides."],
+        "do_not_use_when": ["Do not use when navigation is limited to dot indicators without image previews (use carousel.dots).", "Do not use when multiple full-size items are visible simultaneously in a scrollable row (use content-shelf)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/carousel.thumbnails.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "grid.channel-guide",
+      "title": "Channel Guide Grid",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Interactive channel guide grid with one Tab stop and arrow-key navigation across channels and time slots.",
+      "aliases": ["epg", "electronic program guide", "tv guide", "live guide", "schedule grid"],
+      "tags": ["grid", "channel-guide", "epg", "schedule", "roving-tabindex", "keyboard"],
+      "selection_excerpt": {
+        "use_when": ["Use when content is arranged in a 2D matrix of channels (rows) and time slots (columns).", "Use when program items span time horizontally and are positioned according to schedule duration.", "Use when users navigate spatially across a time-based schedule using arrow keys."],
+        "do_not_use_when": ["Do not use when presenting static tabular data with row/column headers (use grid.data).", "Do not use when items are displayed as a simple vertical or horizontal list without time-based positioning (use list).", "Do not use when supporting spreadsheet-style editing, multi-cell selection, sorting, or resizing (use grid.interactive)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/grid.channel-guide.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "collection-row.basic",
+      "title": "Collection Row",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Horizontal product shelf with a heading, list semantics, and Prev/Next paging that moves focus to newly revealed items.",
+      "aliases": ["content row", "content rail", "rail", "strip", "shelf", "multi item carousel", "product row"],
+      "tags": ["collection-row", "shelf", "rail", "horizontal-list", "ecommerce", "navigation"],
+      "selection_excerpt": {
+        "use_when": ["Use when displaying multiple related items in a horizontally scrollable row under a shared category heading (e.g., e.g., “Customers Also Viewed”, “Action Movies”).", "Use when multiple items are visible simultaneously and can be scrolled left or right.", "Use when each item is a compact card with a primary visual element and brief supporting text."],
+        "do_not_use_when": ["Do not use when only one item is visible at a time within a rotatable sequence (use carousel).", "Do not use when items are arranged in a multi-row or multi-column layout (use grid).", "Do not use when items are presented as a simple vertical list without horizontal scrolling (use list)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/collection-row.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "dialog.modal",
+      "title": "Dialog (Modal)",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "User-initiated blocking dialog that traps focus, inerts background content, and restores focus on close.",
+      "aliases": ["dialog", "modal", "pop-up"],
+      "tags": ["dialog", "modal", "pop-up", "overlay", "focus-trap", "blocking"],
+      "selection_excerpt": {
+        "use_when": ["Use when content appears in an overlay that blocks interaction with the underlying page.", "Use when keyboard focus must move into the dialog and remain contained until dismissal.", "Use when the user must explicitly complete or dismiss the dialog before returning to the main interface."],
+        "do_not_use_when": ["Do not use when the content is part of the normal page flow and does not block background interaction (use page or inline expansion).", "Do not use when presenting brief, non-blocking status messages that do not require focus movement (use toast or snackbar).", "Do not use when the message is urgent and requires immediate acknowledgment before proceeding (use dialog.alert).", "Do not use when the interaction involves complex, multi-step workflows spanning multiple screens (use page)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/dialog.modal.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "link.basic",
+      "title": "Link",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Native link for navigation using <a href>. Supports optional context in the accessible name, including “opens in new tab/window/dialog”.",
+      "aliases": ["anchor", "hyperlink", "external link"],
+      "tags": ["link", "anchor", "navigation", "external-link"],
+      "selection_excerpt": {
+        "use_when": ["Use when activating the element navigates to a different URL, route, or in-page anchor.", "Use when the primary purpose of the element is destination-based navigation rather than performing an action."],
+        "do_not_use_when": ["Do not use when activating the element performs an in-place action such as submitting, saving, deleting, toggling, or opening a dialog (use button).", "Do not use when the element changes UI state without navigation (use button)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/link.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "switch.basic",
+      "title": "Switch",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Two-state on/off control representing a persistent setting. Uses role=\"switch\" with aria-checked, or native checkbox semantics when applicable.",
+      "aliases": ["toggle switch", "preference toggle"],
+      "tags": ["switch", "settings", "on-off", "form-control", "toggle"],
+      "selection_excerpt": {
+        "use_when": ["Use when a control represents a persistent binary setting that remains on or off beyond the current interaction (e.g., “Enable notifications”, “Dark mode”).", "Use when the setting takes effect immediately when toggled, without requiring form submission.", "Use when the control reflects the current state of a system or application preference."],
+        "do_not_use_when": ["Do not use when the control triggers an in-place action or transient feature toggle within the current context (use `button.toggle`).", "Do not use when selecting one or more options from a group of related choices (use `checkbox`).", "Do not use when more than two states are required (use `button.toggle`)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/switch.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "toast.basic",
+      "title": "Toast",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Temporary, non-blocking status message announced via live region. May include optional dismiss control. Disappears automatically.",
+      "aliases": ["notification", "toast", "transient message", "status message"],
+      "tags": ["toast", "notification", "status", "live-region"],
+      "selection_excerpt": {
+        "use_when": ["Use when displaying a temporary, non-blocking status message that appears briefly and then dismisses automatically.", "Use when the message does not move keyboard focus or interrupt the user’s current task.", "Use when the message contains no required actions beyond an optional dismiss control."],
+        "do_not_use_when": ["Do not use when the message requires user acknowledgment, moves keyboard focus, or blocks background interaction (use dialog).", "Do not use when the message is urgent or must interrupt the user immediately (use dialog.alert).", "Do not use when the message includes required actions or interactive controls beyond simple dismissal (use snackbar)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/toast.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "button.toggle",
+      "title": "Toggle Button",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "Two- or three-state button that toggles between pressed and not pressed using aria-pressed.",
+      "aliases": ["toggle button", "pressed button"],
+      "tags": ["button", "toggle", "pressed", "aria-pressed", "mute-button"],
+      "selection_excerpt": {
+        "use_when": ["Use when a control toggles a feature or action within the current context (e.g., Mute, Bold, Pin, Enable Captions)."],
+        "do_not_use_when": ["Do not use when the control navigates to a new URL (use link).", "Do not use when controlling a persistent on/off system setting, such as “Enable notifications”, “Dark mode” (use switch).", "Do not use when the control opens a menu (use menu.button)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/button.toggle.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    }
+  ]
+}
