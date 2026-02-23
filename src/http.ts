@@ -14,6 +14,7 @@ import { createIndexCache } from "./repo/cache.js";
 import { getGlobalRules } from "./tools/getGlobalRules.js";
 import { getPattern } from "./tools/getPattern.js";
 import { listPatterns } from "./tools/listPatterns.js";
+import { jsonResult } from "./mcp/response.js";
 
 function resolvePatternsRoot() {
   // Key fix for prod: avoid machine-specific absolute paths.
@@ -45,22 +46,12 @@ function registerTools(server: McpServer, opts: { patternsRoot: string }) {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(
-              listPatterns(index, {
-                stack,
-                tags: args.tags as string[] | undefined,
-                query: args.query as string | undefined,
-              }),
-              null,
-              2
-            ),
-          },
-        ],
-      };
+      const payload = listPatterns(index, {
+        stack,
+        tags: args.tags as string[] | undefined,
+        query: args.query as string | undefined,
+      });
+      return jsonResult(payload);
     }
   );
 
@@ -77,13 +68,11 @@ function registerTools(server: McpServer, opts: { patternsRoot: string }) {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      const resp = await getPattern(index, opts.patternsRoot, {
+      const payload = await getPattern(index, opts.patternsRoot, {
         stack,
         id: String(args.id),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(resp, null, 2) }],
-      };
+      return jsonResult(payload);
     }
   );
 
@@ -99,10 +88,8 @@ function registerTools(server: McpServer, opts: { patternsRoot: string }) {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      const resp = await getGlobalRules(index, opts.patternsRoot, { stack });
-      return {
-        content: [{ type: "text", text: JSON.stringify(resp, null, 2) }],
-      };
+      const payload = await getGlobalRules(index, opts.patternsRoot, { stack });
+      return jsonResult(payload);
     }
   );
 }
