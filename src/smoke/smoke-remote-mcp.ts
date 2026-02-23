@@ -32,6 +32,8 @@ const listPatternsResult = await client.callTool({
   name: "list_patterns",
   arguments: { stack: "web/react" },
 });
+const listResult = listPatternsResult;
+console.log("list_patterns full result:", JSON.stringify(listResult, null, 2));
 
 assertHasStructuredContent(listPatternsResult, "list_patterns");
 const listPayload = listPatternsResult.structuredContent as {
