@@ -1,16 +1,9 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildPatternIndex = buildPatternIndex;
-exports.makeRelativePath = makeRelativePath;
-const fast_glob_1 = __importDefault(require("fast-glob"));
-const gray_matter_1 = __importDefault(require("gray-matter"));
-const node_path_1 = __importDefault(require("node:path"));
-const paths_1 = require("./paths");
-const fs_1 = require("../utils/fs");
-const hash_1 = require("../utils/hash");
+import fg from "fast-glob";
+import matter from "gray-matter";
+import path from "node:path";
+import { getRepoPaths } from "./paths.js";
+import { readTextFile, fileExists, toPosixPath } from "../utils/fs.js";
+import { sha256 } from "../utils/hash.js";
 function normalizeBullet(s, maxLen) {
     if (typeof s !== "string")
         return null;
@@ -88,31 +81,31 @@ function buildCatalogSelectionMap(catalogText) {
  * Reads + indexes the content repo once.
  * After this, list_patterns is very fast.
  */
-async function buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds) {
-    const { baselinePath, catalogPath, componentsGlob } = (0, paths_1.getRepoPaths)(patternRepoPath, stack);
-    if (!(await (0, fs_1.fileExists)(baselinePath))) {
+export async function buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds) {
+    const { baselinePath, catalogPath, componentsGlob } = getRepoPaths(patternRepoPath, stack);
+    if (!(await fileExists(baselinePath))) {
         throw new Error(`Missing baseline file: ${baselinePath}`);
     }
-    if (!(await (0, fs_1.fileExists)(catalogPath))) {
+    if (!(await fileExists(catalogPath))) {
         throw new Error(`Missing catalog file: ${catalogPath}`);
     }
     // Deterministic ordering: sort file paths before reading/hashing/parsing
-    const componentPaths = (await (0, fast_glob_1.default)(componentsGlob, { onlyFiles: true, unique: true }))
-        .map(fs_1.toPosixPath)
+    const componentPaths = (await fg(componentsGlob, { onlyFiles: true, unique: true }))
+        .map(toPosixPath)
         .sort((a, b) => a.localeCompare(b));
-    const baselineText = await (0, fs_1.readTextFile)(baselinePath);
-    const catalogText = await (0, fs_1.readTextFile)(catalogPath);
+    const baselineText = await readTextFile(baselinePath);
+    const catalogText = await readTextFile(catalogPath);
     const selectionById = buildCatalogSelectionMap(catalogText);
     // Read each component once; reuse both for hashing and parsing
     const fileTextByPath = new Map();
     for (const p of componentPaths) {
         // NOTE: componentPaths are POSIX normalized; ensure readTextFile can handle them on Windows.
         // If not, store original paths separately. (If you're not targeting Windows right now, you're fine.)
-        fileTextByPath.set(p, await (0, fs_1.readTextFile)(p));
+        fileTextByPath.set(p, await readTextFile(p));
     }
     // Deterministic fingerprint of repo state
     const catalog_revision = "sha256:" +
-        (0, hash_1.sha256)([
+        sha256([
             "stack:" + stack,
             "baseline:" + baselineText,
             "catalog:" + catalogText,
@@ -126,7 +119,7 @@ async function buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds) {
         const raw = fileTextByPath.get(filePath);
         if (raw == null)
             throw new Error(`Internal error: missing cached text for ${filePath}`);
-        const parsed = (0, gray_matter_1.default)(raw);
+        const parsed = matter(raw);
         const data = parsed.data;
         const id = String(data.id ?? "").trim();
         if (!id) {
@@ -177,7 +170,7 @@ async function buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds) {
 /**
  * Helper to make debug info safe and consistent for output.
  */
-function makeRelativePath(patternRepoPath, filePath) {
-    const rel = node_path_1.default.relative(patternRepoPath, filePath);
-    return (0, fs_1.toPosixPath)(rel);
+export function makeRelativePath(patternRepoPath, filePath) {
+    const rel = path.relative(patternRepoPath, filePath);
+    return toPosixPath(rel);
 }

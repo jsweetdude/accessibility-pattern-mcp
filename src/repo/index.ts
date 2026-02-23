@@ -2,16 +2,16 @@ import fg from "fast-glob";
 import matter from "gray-matter";
 import path from "node:path";
 
-import { getRepoPaths } from "./paths";
-import { readTextFile, fileExists, toPosixPath } from "../utils/fs";
-import { sha256 } from "../utils/hash";
+import { getRepoPaths } from "./paths.js";
+import { readTextFile, fileExists, toPosixPath } from "../utils/fs.js";
+import { sha256 } from "../utils/hash.js";
 import {
   CacheMeta,
   PatternStatus,
   PatternSummary,
   StackRef,
   SelectionExcerpt,
-} from "../contracts/v1/types";
+} from "../contracts/v1/types.js";
 
 type PatternIndex = {
   stack: StackRef;
@@ -53,7 +53,9 @@ function parseSelectionExcerpt(value: unknown): SelectionExcerpt | undefined {
 
 function uniqSorted(values: string[]): string[] {
   const cleaned = values.map((s) => String(s).trim()).filter(Boolean);
-  return Array.from(new Set(cleaned)).sort((a, b) => a.localeCompare(b));
+  return Array.from(new Set<string>(cleaned)).sort((a: string, b: string) =>
+    a.localeCompare(b)
+  );
 }
 
 /**
@@ -119,7 +121,7 @@ export async function buildPatternIndex(
   // Deterministic ordering: sort file paths before reading/hashing/parsing
   const componentPaths = (await fg(componentsGlob, { onlyFiles: true, unique: true }))
     .map(toPosixPath)
-    .sort((a, b) => a.localeCompare(b));
+    .sort((a: string, b: string) => a.localeCompare(b));
 
   const baselineText = await readTextFile(baselinePath);
   const catalogText = await readTextFile(catalogPath);

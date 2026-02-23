@@ -1,4 +1,3 @@
-"use strict";
 // src/repo/sections.ts
 /**
  * Goal:
@@ -9,8 +8,6 @@
  * - It extracts bullet lists into string arrays
  * - It preserves Golden Pattern as markdown (often contains code blocks)
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractSections = extractSections;
 // Headings we recognize, mapped to keys in ParsedSections.
 // Add more later without changing the rest of the parser.
 const HEADING_TO_KEY = {
@@ -26,7 +23,7 @@ const HEADING_TO_KEY = {
 /**
  * Extract sections from markdown (content without frontmatter).
  */
-function extractSections(markdownBody) {
+export function extractSections(markdownBody) {
     const normalized = markdownBody
         .replace(/\r\n/g, "\n")
         // normalize non-breaking spaces to regular spaces

@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.listPatterns = listPatterns;
-function listPatterns(index, args) {
+export function listPatterns(index, args) {
     const { stack, tags, query } = args;
     if (stack !== index.stack) {
         throw new Error(`Stack mismatch. Index=${index.stack}, requested=${stack}`);

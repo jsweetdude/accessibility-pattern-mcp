@@ -7,7 +7,7 @@ import {
   RuleScope,
   CodeSnippet,
   ApplyPolicy,
-} from "../contracts/v1/types";
+} from "../contracts/v1/types.js";
 
 type ParseGlobalRulesResult = {
   meta: GlobalRulesMeta;
@@ -33,7 +33,9 @@ function toRuleScopeArray(raw: string[], ctx: string): RuleScope[] {
   const out: RuleScope[] = [];
   for (const s of raw) out.push(assertIsRuleScope(s, ctx));
   // de-dupe + deterministic ordering
-  return Array.from(new Set(out)).sort((a, b) => a.localeCompare(b));
+  return Array.from(new Set<RuleScope>(out)).sort((a: RuleScope, b: RuleScope) =>
+    a.localeCompare(b)
+  );
 }
 
 function parseStringArray(value: unknown): string[] | undefined {

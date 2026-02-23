@@ -1,5 +1,5 @@
 import path from "node:path";
-import { StackRef } from "../contracts/v1/types";
+import { StackRef } from "../contracts/v1/types.js";
 
 export type RepoPaths = {
   baselinePath: string;

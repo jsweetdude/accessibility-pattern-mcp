@@ -1,9 +1,9 @@
 // src/tools/getPattern.ts
 import matter from "gray-matter";
-import { readTextFile } from "../utils/fs";
-import { extractSections } from "../repo/sections";
-import { makeRelativePath, PatternIndex } from "../repo/index";
-import { StackRef, GetPatternResponse, PatternStatus, PatternDetail } from "../contracts/v1/types";
+import { readTextFile } from "../utils/fs.js";
+import { extractSections } from "../repo/sections.js";
+import { makeRelativePath, PatternIndex } from "../repo/index.js";
+import { StackRef, GetPatternResponse, PatternStatus, PatternDetail } from "../contracts/v1/types.js";
 
 export type GetPatternArgs = {
   stack: StackRef;

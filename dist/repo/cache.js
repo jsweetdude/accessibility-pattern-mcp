@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createIndexCache = createIndexCache;
-const index_1 = require("./index");
-function createIndexCache(params) {
+import { buildPatternIndex } from "./index.js";
+export function createIndexCache(params) {
     const { patternRepoPath, cacheTtlSeconds } = params;
     const store = new Map();
     async function getIndex(stack) {
@@ -16,7 +13,7 @@ function createIndexCache(params) {
             }
         }
         // Otherwise rebuild
-        const index = await (0, index_1.buildPatternIndex)(patternRepoPath, stack, cacheTtlSeconds);
+        const index = await buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds);
         store.set(stack, { index, builtAtMs: now });
         return index;
     }

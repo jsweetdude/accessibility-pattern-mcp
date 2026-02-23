@@ -1,8 +1,8 @@
-import { readTextFile } from "../utils/fs";
-import { getRepoPaths } from "../repo/paths";
-import { PatternIndex } from "../repo/index";
-import { GetGlobalRulesResponse, StackRef, RuleScope } from "../contracts/v1/types";
-import { parseGlobalRulesMarkdown } from "../repo/globalRules";
+import { readTextFile } from "../utils/fs.js";
+import { getRepoPaths } from "../repo/paths.js";
+import { PatternIndex } from "../repo/index.js";
+import { GetGlobalRulesResponse, StackRef, RuleScope } from "../contracts/v1/types.js";
+import { parseGlobalRulesMarkdown } from "../repo/globalRules.js";
 
 export type GetGlobalRulesArgs = {
   stack: StackRef;

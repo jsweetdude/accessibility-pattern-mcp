@@ -1,6 +1,6 @@
 // src/repo/cache.ts
-import { StackRef } from "../contracts/v1/types";
-import { buildPatternIndex, PatternIndex } from "./index";
+import { StackRef } from "../contracts/v1/types.js";
+import { buildPatternIndex, PatternIndex } from "./index.js";
 
 export type IndexCache = {
   getIndex(stack: StackRef): Promise<PatternIndex>;

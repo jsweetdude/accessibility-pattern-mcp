@@ -1,5 +1,5 @@
-import { ListPatternsResponse, StackRef } from "../contracts/v1/types";
-import { PatternIndex } from "../repo/index";
+import { ListPatternsResponse, PatternSummary, StackRef } from "../contracts/v1/types.js";
+import { PatternIndex } from "../repo/index.js";
 
 export type ListPatternsArgs = {
   stack: StackRef;
@@ -19,13 +19,15 @@ export function listPatterns(index: PatternIndex, args: ListPatternsArgs): ListP
   // Filter by tags (OR logic): match if pattern has ANY of the requested tags.
   if (tags && tags.length > 0) {
     const wanted = new Set(tags.map((t) => t.toLowerCase()));
-    results = results.filter((p) => p.tags.some((t) => wanted.has(t.toLowerCase())));
+    results = results.filter((p: PatternSummary) =>
+      p.tags.some((t) => wanted.has(t.toLowerCase()))
+    );
   }
 
   // Simple query search across id, summary, aliases
   if (query && query.trim()) {
     const q = query.toLowerCase();
-    results = results.filter((p) => {
+    results = results.filter((p: PatternSummary) => {
       if (p.id.toLowerCase().includes(q)) return true;
       if (p.summary.toLowerCase().includes(q)) return true;
       if (p.aliases.some((a) => a.toLowerCase().includes(q))) return true;

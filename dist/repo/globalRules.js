@@ -1,10 +1,4 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseGlobalRulesMarkdown = parseGlobalRulesMarkdown;
-const gray_matter_1 = __importDefault(require("gray-matter"));
+import matter from "gray-matter";
 // Keep allowed values centralized and deterministic.
 const ALLOWED_SCOPES = ["utility", "style", "component", "layout", "page"];
 function normalizeScopeToken(raw) {
@@ -46,8 +40,8 @@ function parseApplyPolicy(value, ctx) {
         policy.scopes_in_order = scopes_in_order;
     return Object.keys(policy).length ? policy : undefined;
 }
-function parseGlobalRulesMarkdown(fileText, expectedStack) {
-    const parsed = (0, gray_matter_1.default)(fileText);
+export function parseGlobalRulesMarkdown(fileText, expectedStack) {
+    const parsed = matter(fileText);
     const data = parsed.data;
     const body = parsed.content.replace(/\r\n/g, "\n").trim();
     // ---- Frontmatter -> meta (light validation) ----

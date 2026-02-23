@@ -1,15 +1,9 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPattern = getPattern;
 // src/tools/getPattern.ts
-const gray_matter_1 = __importDefault(require("gray-matter"));
-const fs_1 = require("../utils/fs");
-const sections_1 = require("../repo/sections");
-const index_1 = require("../repo/index");
-async function getPattern(index, patternRepoPath, args) {
+import matter from "gray-matter";
+import { readTextFile } from "../utils/fs.js";
+import { extractSections } from "../repo/sections.js";
+import { makeRelativePath } from "../repo/index.js";
+export async function getPattern(index, patternRepoPath, args) {
     const { stack, id } = args;
     if (stack !== index.stack) {
         throw new Error(`Stack mismatch. Index=${index.stack}, requested=${stack}`);
@@ -18,8 +12,8 @@ async function getPattern(index, patternRepoPath, args) {
     if (!filePath) {
         throw new Error(`PATTERN_NOT_FOUND: No pattern with id '${id}' for stack '${stack}'`);
     }
-    const raw = await (0, fs_1.readTextFile)(filePath);
-    const parsed = (0, gray_matter_1.default)(raw);
+    const raw = await readTextFile(filePath);
+    const parsed = matter(raw);
     const data = parsed.data;
     // Frontmatter fields (strict enough for v1)
     const patternId = String(data.id ?? "").trim();
@@ -39,7 +33,7 @@ async function getPattern(index, patternRepoPath, args) {
     }
     if (!summary)
         throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
-    const sections = (0, sections_1.extractSections)(parsed.content);
+    const sections = extractSections(parsed.content);
     const detail = {
         id,
         stack,
@@ -49,7 +43,7 @@ async function getPattern(index, patternRepoPath, args) {
         aliases,
         sections,
         source: {
-            relative_path: (0, index_1.makeRelativePath)(patternRepoPath, filePath),
+            relative_path: makeRelativePath(patternRepoPath, filePath),
         },
     };
     return {

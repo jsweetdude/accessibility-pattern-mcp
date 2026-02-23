@@ -3,12 +3,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-import { createIndexCache } from "../repo/cache";
-import { getConfig } from "../config";
-import { listPatterns } from "../tools/listPatterns";
-import { getPattern } from "../tools/getPattern";
-import { getGlobalRules } from "../tools/getGlobalRules";
-import { StackRef } from "../contracts/v1/types";
+import { createIndexCache } from "../repo/cache.js";
+import { getConfig } from "../config.js";
+import { listPatterns } from "../tools/listPatterns.js";
+import { getPattern } from "../tools/getPattern.js";
+import { getGlobalRules } from "../tools/getGlobalRules.js";
+import { StackRef } from "../contracts/v1/types.js";
 
 export async function startMcpServer() {
   const config = getConfig();
