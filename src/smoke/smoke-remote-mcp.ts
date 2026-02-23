@@ -32,6 +32,8 @@ const listPatternsResult = await client.callTool({
   name: "list_patterns",
   arguments: { stack: "web/react" },
 });
+console.log("TOP-LEVEL KEYS:", Object.keys(listPatternsResult as any));
+console.log("RAW RESULT:", JSON.stringify(listPatternsResult, null, 2));
 const listResult = listPatternsResult;
 console.log("list_patterns full result:", JSON.stringify(listResult, null, 2));
 
