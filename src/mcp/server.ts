@@ -9,6 +9,7 @@ import { listPatterns } from "../tools/listPatterns.js";
 import { getPattern } from "../tools/getPattern.js";
 import { getGlobalRules } from "../tools/getGlobalRules.js";
 import { StackRef } from "../contracts/v1/types.js";
+import { jsonResult } from "./response.js";
 
 export async function startMcpServer() {
   const config = getConfig();
@@ -36,14 +37,12 @@ export async function startMcpServer() {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(listPatterns(index, { stack, tags: args.tags as string[] | undefined, query: args.query as string | undefined }), null, 2),
-          },
-        ],
-      };
+      const payload = listPatterns(index, {
+        stack,
+        tags: args.tags as string[] | undefined,
+        query: args.query as string | undefined,
+      });
+      return jsonResult(payload);
     }
   );
 
@@ -60,10 +59,11 @@ export async function startMcpServer() {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      const resp = await getPattern(index, config.patternRepoPath, { stack, id: String(args.id) });
-      return {
-        content: [{ type: "text", text: JSON.stringify(resp, null, 2) }],
-      };
+      const payload = await getPattern(index, config.patternRepoPath, {
+        stack,
+        id: String(args.id),
+      });
+      return jsonResult(payload);
     }
   );
 
@@ -79,10 +79,8 @@ export async function startMcpServer() {
     async (args) => {
       const stack = args.stack as StackRef;
       const index = await cache.getIndex(stack);
-      const resp = await getGlobalRules(index, config.patternRepoPath, { stack });
-      return {
-        content: [{ type: "text", text: JSON.stringify(resp, null, 2) }],
-      };
+      const payload = await getGlobalRules(index, config.patternRepoPath, { stack });
+      return jsonResult(payload);
     }
   );
 
