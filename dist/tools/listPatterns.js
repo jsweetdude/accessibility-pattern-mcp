@@ -25,6 +25,7 @@ function listPatterns(index, args) {
             return false;
         });
     }
+    results = [...results].sort((a, b) => a.id.localeCompare(b.id));
     return {
         contract_version: "1.0",
         stack,
