@@ -10,6 +10,7 @@
     "start": "node dist/http.js",
     "dev:http": "tsx watch src/http.ts",
     "inspector": "npm run build && mcp-inspector node dist/index.js",
+    "smoke:remote": "npm run build && node dist/smoke-remote-mcp.js",
     "test:regression": "ts-node scripts/regression-runner.ts",
     "test:regression:update": "ts-node scripts/regression-runner.ts --update",
     "test:regression:ignore-ttl": "ts-node scripts/regression-runner.ts --ignore-cache-ttl"
