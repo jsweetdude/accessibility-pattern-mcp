@@ -6,6 +6,7 @@ import { createIndexCache } from "../repo/cache.js";
 import { getGlobalRules } from "../tools/getGlobalRules.js";
 import { getPattern } from "../tools/getPattern.js";
 import { listPatterns } from "../tools/listPatterns.js";
+import { withTelemetry } from "../telemetryWrap.js";
 import { jsonResult } from "./response.js";
 
 type CreateMcpServerOptions = {
@@ -33,11 +34,28 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
     },
     async (args) => {
       const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = listPatterns(index, {
+      const toolArgs = {
         stack,
         tags: args.tags as string[] | undefined,
         query: args.query as string | undefined,
+      };
+      const payload = await withTelemetry({
+        tool: "list_patterns",
+        stack,
+        args: toolArgs,
+        handler: async () => {
+          const index = await cache.getIndex(stack);
+          return listPatterns(index, {
+            stack,
+            tags: args.tags as string[] | undefined,
+            query: args.query as string | undefined,
+          });
+        },
+        summarizeResult: (result) => ({
+          count: result.count,
+          cache_ttl_seconds: result.cache_ttl_seconds,
+          catalog_revision: result.catalog_revision,
+        }),
       });
       return jsonResult(payload);
     }
@@ -54,10 +72,26 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
     },
     async (args) => {
       const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = await getPattern(index, opts.patternsRoot, {
+      const toolArgs = {
         stack,
         id: String(args.id),
+      };
+      const payload = await withTelemetry({
+        tool: "get_pattern",
+        stack,
+        args: toolArgs,
+        handler: async () => {
+          const index = await cache.getIndex(stack);
+          return getPattern(index, opts.patternsRoot, {
+            stack,
+            id: String(args.id),
+          });
+        },
+        summarizeResult: (result) => ({
+          pattern_id: result.pattern.id,
+          cache_ttl_seconds: result.cache_ttl_seconds,
+          catalog_revision: result.catalog_revision,
+        }),
       });
       return jsonResult(payload);
     }
@@ -73,8 +107,23 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
     },
     async (args) => {
       const stack = args.stack as StackRef;
-      const index = await cache.getIndex(stack);
-      const payload = await getGlobalRules(index, opts.patternsRoot, { stack });
+      const toolArgs = {
+        stack,
+      };
+      const payload = await withTelemetry({
+        tool: "get_global_rules",
+        stack,
+        args: toolArgs,
+        handler: async () => {
+          const index = await cache.getIndex(stack);
+          return getGlobalRules(index, opts.patternsRoot, { stack });
+        },
+        summarizeResult: (result) => ({
+          rules_count: Array.isArray(result.rules.items) ? result.rules.items.length : 0,
+          cache_ttl_seconds: result.cache_ttl_seconds,
+          catalog_revision: result.catalog_revision,
+        }),
+      });
       return jsonResult(payload);
     }
   );
