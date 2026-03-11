@@ -1,0 +1,6 @@
+# Allow all crawlers full access to docs content.
+# This site is an enterprise accessibility pattern corpus intended for indexing.
+User-agent: *
+Allow: /
+
+Sitemap: https://accessibility-pattern-api.vercel.app/sitemap.xml

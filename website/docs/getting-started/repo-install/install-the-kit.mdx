@@ -1,0 +1,60 @@
+---
+title: Install the Kit
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+The `init` CLI command is the best way to install the A11y Context kit into a repository. Note that this project is currently in **proof-of-concept mode**. The walkthrough below installs the kit for the `web/react` app stack using `mcp` mode. You can customize which AI clients to install for using the `--clients` flag.
+
+## Proof-of-concept install
+
+1. Create a blank React app (instructions for Vite below).
+
+<Tabs>
+  <TabItem value="npm" label="npm">
+
+```bash
+npm create vite@latest my-accessible-react-app -- --template react
+cd my-accessible-react-app
+```
+
+  </TabItem>
+</Tabs>
+
+2. Run the A11y Context installer.
+
+<Tabs>
+  <TabItem value="npm" label="npm">
+
+```bash
+npx -p @a11y-context/cli@latest a11y-context init --stack web/react --mode mcp --clients all
+```
+
+  </TabItem>
+</Tabs>
+
+`--clients` accepts a comma-separated list (e.g., `--clients claude,cursor`). Note that `--clients copilot` implies VS Code setup — it installs both Copilot and VS Code files.
+
+## What gets added to your repo
+- `.a11y-context/config.json`
+- Client instruction files (examples):
+  - Cursor: `.cursor/rules/a11y-context.mdc`
+  - Claude Code: `CLAUDE.md` + optionally `.mcp.json`
+  - Copilot: `.github/copilot-instructions.md`
+  - Android Studio Gemini: `AGENTS.md`
+  - Gemini CLI: `GEMINI.md`
+
+## Safe behavior expectation
+- Installer does not overwrite existing instruction files.
+- It either:
+  - appends a clearly delimited "A11y Context" section, or
+  - creates a separate file and references it.
+
+## What this step does not do
+- It does not automatically enable MCP inside every client UI.
+- It does not create an index for docs retrieval.
+
+## Next step
+- If using docs-only or hybrid fallback, go to **Configure RAG**.
+- Otherwise, go to **Enable in Your Client**.

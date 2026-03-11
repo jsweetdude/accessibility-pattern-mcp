@@ -1,5 +1,6 @@
 ---
 id: collection-row.basic
+title: Collection Row
 stack: web/react
 status: beta
 tags: [collection-row, shelf, rail, horizontal-list, ecommerce, navigation]
@@ -22,7 +23,6 @@ summary: Horizontal product shelf with a heading, list semantics, and Prev/Next 
 ## Must Haves
 - Use a visible heading, typically an `<h2>`, above the row.
 - Use list semantics for the row: `ul` with `li` items.
-- Ensure a visible focus state (e.g., a 2px solid outline offset by 1-2px) on each item and button.
 - Each item must comprise a single focus stop: in other words, consist of a single link `<a>` that contains:
   - A visual element (image, poster, thumbnail, or media preview).
   - A visible title that identifies the item.
@@ -39,7 +39,8 @@ summary: Horizontal product shelf with a heading, list semantics, and Prev/Next 
 - Paging focus behavior:
   - Activating Next moves focus to the first newly revealed item (left-most visible link).
     - For example, if items 1 through 6 are visible, and the user activates the Next button, then items 7 through 12 become visible, and focus moves to item 7.
-  - Activating Previous moves focus to the last newly revealed item (right-most visible link)
+  - Activating Previous moves focus to the last newly revealed item (right-most visible link).
+- Ensure a visible focus state (e.g., a 2px solid outline offset by 1-2px) on each item and button.
  
 ## Customizable
 - In the golden pattern, we wrap the component in a container with `role="group"` and `aria-labelledby` pointing to the heading ID. This is optional. Engineers may choose instead to use a `<section>` or `role="region"`, or to eschew the container entirely.

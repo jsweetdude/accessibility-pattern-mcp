@@ -1,5 +1,6 @@
 ---
 id: link.basic
+title: Link
 stack: web/react
 status: beta
 tags: [link, anchor, navigation, external-link]

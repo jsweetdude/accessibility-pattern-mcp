@@ -1,5 +1,6 @@
 ---
 id: toast.basic
+title: Toast
 stack: web/react
 status: beta
 tags: [toast, notification, status, live-region]

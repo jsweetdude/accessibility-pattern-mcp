@@ -1,5 +1,6 @@
 ---
 id: grid.channel-guide
+title: Channel Guide Grid
 stack: web/react
 status: beta
 tags: [grid, channel-guide, epg, schedule, roving-tabindex, keyboard]

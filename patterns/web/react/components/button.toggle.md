@@ -1,5 +1,6 @@
 ---
 id: button.toggle
+title: Toggle Button
 stack: web/react
 status: beta
 tags: [button, toggle, pressed, aria-pressed, mute-button]

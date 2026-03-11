@@ -1,5 +1,6 @@
 ---
 id: button.basic
+title: Basic Button
 stack: web/react
 status: beta
 tags: [button, control, action, icon-button]
