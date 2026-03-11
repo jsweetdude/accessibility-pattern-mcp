@@ -51,6 +51,7 @@ summary: A non-modal header navigation pattern that supports top-level links and
 
 ### Sub-menu container
 - The sub-menu container is positioned immediately after its toggle control in the DOM.
+- Sub-menus all default to closed, or hidden, when the page loads.
 - The sub-menu is shown/hidden in the DOM (e.g., via `hidden`) so that when closed, submenu links cannot be reached by keyboard or screen readers.
 - Sub-menu items are links and/or buttons contained in a list structure (`<ul><li>…</li></ul>`).
 - The sub-menu is non-modal and does not trap focus.
@@ -82,6 +83,7 @@ summary: A non-modal header navigation pattern that supports top-level links and
 - Don’t use `role="menu"` / `role="menuitem"` unless you implement the full ARIA menu widget behavior (managed focus, arrow keys, typeahead).
 - Don’t leave submenu content visible while `aria-expanded="false"` (and vice versa).
 - Don’t strand focus by removing the currently focused submenu item without closing and allowing focus to move naturally.
+- Don’t render sub-menus expanded/visible by default. They open only after the user activates the corresponding toggle.
 
 ## Golden Pattern
 ```jsx
@@ -337,3 +339,4 @@ Screen Reader
 -   Closed submenus are not reachable.
 -   Submenu items announce as links/buttons and operate normally.
 -   Icon toggle buttons have accessible names that include the associated parent label (e.g., "Categories menu").
+- On initial render, all sub-menus are closed (`aria-expanded="false"` on toggles; all sub-menus hidden/unreachable).
