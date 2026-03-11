@@ -1,8 +1,9 @@
 ---
 id: switch.basic
+title: Switch
 stack: web/react
 status: beta
-tags: [switch, settings, on-off, form-control, toggle]
+tags: [switch, form, settings, on-off, form-control, toggle]
 aliases: [toggle switch, preference toggle]
 summary: Two-state on/off control representing a persistent setting. Uses role="switch" with aria-checked, or native checkbox semantics when applicable.
 ---
@@ -39,6 +40,7 @@ summary: Two-state on/off control representing a persistent setting. Uses role="
   - Use `fieldset` with `legend`, or
   - Wrap in `role="group"` with `aria-labelledby`.
 - If additional descriptive static text is relevant to a switch or switch group, associate it using `aria-describedby`.
+- Ensure a visible focus state (e.g., a 2px solid outline offset by 1-2px) around the switch control.
 
 ## Customizable
 - Whether the visual design resembles a sliding switch.

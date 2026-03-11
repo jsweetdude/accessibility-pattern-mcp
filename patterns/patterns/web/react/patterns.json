@@ -32,8 +32,33 @@
       }
     },
     {
+      "id": "menu.account",
+      "title": "Account Menu",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "A non-modal, button-invoked account menu that reveals a small list of links and optional actions. Uses aria-expanded plus DOM show/hide so keyboard users Tab into items and Esc closes.",
+      "aliases": ["account dropdown", "account menu", "profile menu", "user menu", "avatar menu", "settings menu"],
+      "tags": ["menu", "account", "profile", "disclosure", "popover"],
+      "selection_excerpt": {
+        "use_when": ["Use when providing a compact set of account-related destinations or actions (Profile, Settings, Billing, Sign out).", "Use when the trigger is a dedicated control (avatar button, 'Account' button) with no other primary action.", "Use when the menu content is short and stable (typically 3–10 items).", "Use when (usually) the menu is in the top-right area of a webpage."],
+        "do_not_use_when": ["Do not use for primary site navigation with multiple sibling dropdowns (use `navigation-menu.basic`).", "Do not use for choosing a form value (use `select.basic`, or `combobox` if searchable)", "Do not use for dense command palettes or application-style decision trees that require arrow-key navigation and focus management (use `menu.menubar`)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/menu.account.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
       "id": "button.basic",
-      "title": "Basic Button",
+      "title": "Button",
       "pattern_type": "component",
 
       "status": "beta",
@@ -43,7 +68,7 @@
       "aliases": ["btn", "primary button", "icon button", "call to action", "cta"],
       "tags": ["button", "control", "action", "icon-button"],
       "selection_excerpt": {
-        "use_when": ["Use when the user triggers an immediate action (e.g., “Save”, “Continue”, “Dismiss”)."],
+        "use_when": ["Use when the user triggers an immediate action (e.g., 'Save', 'Continue', 'Dismiss')."],
         "do_not_use_when": ["Do not use when the control navigates to a new URL (use link).", "Do not use when the control represents an on/off pressed state (use button.toggle).", "Do not use when the control opens a menu (use menu.button)."]
       },
 
@@ -58,7 +83,7 @@
     },
     {
       "id": "carousel.dots",
-      "title": "Carousel with Dot Navigation",
+      "title": "Carousel (Dot Navigation)",
       "pattern_type": "component",
 
       "status": "beta",
@@ -83,7 +108,7 @@
     },
     {
       "id": "carousel.thumbnails",
-      "title": "Carousel with Thumbnail Navigation",
+      "title": "Carousel (Thumbnail Navigation)",
       "pattern_type": "component",
 
       "status": "beta",
@@ -143,7 +168,7 @@
       "aliases": ["content row", "content rail", "rail", "strip", "shelf", "multi item carousel", "product row"],
       "tags": ["collection-row", "shelf", "rail", "horizontal-list", "ecommerce", "navigation"],
       "selection_excerpt": {
-        "use_when": ["Use when displaying multiple related items in a horizontally scrollable row under a shared category heading (e.g., e.g., “Customers Also Viewed”, “Action Movies”).", "Use when multiple items are visible simultaneously and can be scrolled left or right.", "Use when each item is a compact card with a primary visual element and brief supporting text."],
+        "use_when": ["Use when displaying multiple related items in a horizontally scrollable row under a shared category heading (e.g., e.g., 'Customers Also Viewed', 'Action Movies').", "Use when multiple items are visible simultaneously and can be scrolled left or right.", "Use when each item is a compact card with a primary visual element and brief supporting text."],
         "do_not_use_when": ["Do not use when only one item is visible at a time within a rotatable sequence (use carousel).", "Do not use when items are arranged in a multi-row or multi-column layout (use grid).", "Do not use when items are presented as a simple vertical list without horizontal scrolling (use list)."]
       },
 
@@ -189,7 +214,7 @@
       "status": "beta",
       "latest_version": "0.1.0",
 
-      "summary": "Native link for navigation using <a href>. Supports optional context in the accessible name, including “opens in new tab/window/dialog”.",
+      "summary": "Native link for navigation using <a href>. Supports optional context in the accessible name, including 'opens in new tab/window/dialog'.",
       "aliases": ["anchor", "hyperlink", "external link"],
       "tags": ["link", "anchor", "navigation", "external-link"],
       "selection_excerpt": {
@@ -207,6 +232,56 @@
       }
     },
     {
+      "id": "navigation-menu.basic",
+      "title": "Navigation Menu",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "A non-modal header navigation pattern that supports top-level links and optional sub-menus. Uses disclosure-style toggles (buttons) with aria-expanded/controls and Tab-based navigation (no roving focus / no role=menu).",
+      "aliases": ["nav dropdown", "header dropdown", "mega menu", "disclosure navigation", "flyout menu"],
+      "tags": ["navigation", "menu", "disclosure", "header", "sitemap", "flyout"],
+      "selection_excerpt": {
+        "use_when": ["Use when a website's top-level navigation contains at least one sub-menu of links.", "Use for primary or secondary navigation regions (e.g., header nav, section nav) when the same link + sub-menu structure is needed.", "Use when the navigation structure maps to a sitemap-like set of destinations."],
+        "do_not_use_when": ["Do not use when you need application-style menubar behavior, such as arrow-key navigation, roving tabindex, typeahead (use `navigation-menu.menubar`).", "Do not use to select a value within a form (use `select.basic` or `combobox` when searchable).", "Do not use as the mobile or responsive version of a navigation menu."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/navigation-menu.basic.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
+      "id": "select.basic",
+      "title": "Select",
+      "pattern_type": "component",
+
+      "status": "beta",
+      "latest_version": "0.1.0",
+
+      "summary": "A custom-styled form select that matches native <select> behavior using a button trigger + listbox popup, and a visually hidden native <select> for form submission and browser autofill.",
+      "aliases": ["form select", "styled select", "listbox select", "dropdown select"],
+      "tags": ["select", "form", "form-select", "listbox", "dropdown"],
+      "selection_excerpt": {
+        "use_when": ["Use when a form input must allow selecting one option from a predefined set.", "Use when the options are short labels and the selection is discrete (not freeform text).", "Use for primary or secondary forms anywhere on a site or application."],
+        "do_not_use_when": ["Do not use when the user needs to type to filter a large list (use a `combobox` / autocomplete).", "Do not use when multiple selections are required (use a dedicated multi-select pattern).", "Do not use for navigation menus or account menus (use `navigation-menu.basic` or `menu.account`)."]
+      },
+
+      "variants": [],
+      "default_variant": null,
+
+      "source": {
+        "path": "components/select.basic.md",
+        "format": "markdown",
+        "frontmatter": true
+      }
+    },
+    {
       "id": "switch.basic",
       "title": "Switch",
       "pattern_type": "component",
@@ -218,7 +293,7 @@
       "aliases": ["toggle switch", "preference toggle"],
       "tags": ["switch", "settings", "on-off", "form-control", "toggle"],
       "selection_excerpt": {
-        "use_when": ["Use when a control represents a persistent binary setting that remains on or off beyond the current interaction (e.g., “Enable notifications”, “Dark mode”).", "Use when the setting takes effect immediately when toggled, without requiring form submission.", "Use when the control reflects the current state of a system or application preference."],
+        "use_when": ["Use when a control represents a persistent binary setting that remains on or off beyond the current interaction (e.g., 'Enable notifications', 'Dark mode').", "Use when the setting takes effect immediately when toggled, without requiring form submission.", "Use when the control reflects the current state of a system or application preference."],
         "do_not_use_when": ["Do not use when the control triggers an in-place action or transient feature toggle within the current context (use `button.toggle`).", "Do not use when selecting one or more options from a group of related choices (use `checkbox`).", "Do not use when more than two states are required (use `button.toggle`)."]
       },
 
@@ -269,7 +344,7 @@
       "tags": ["button", "toggle", "pressed", "aria-pressed", "mute-button"],
       "selection_excerpt": {
         "use_when": ["Use when a control toggles a feature or action within the current context (e.g., Mute, Bold, Pin, Enable Captions)."],
-        "do_not_use_when": ["Do not use when the control navigates to a new URL (use link).", "Do not use when controlling a persistent on/off system setting, such as “Enable notifications”, “Dark mode” (use switch).", "Do not use when the control opens a menu (use menu.button)."]
+        "do_not_use_when": ["Do not use when the control navigates to a new URL (use link).", "Do not use when controlling a persistent on/off system setting, such as 'Enable notifications', 'Dark mode' (use switch).", "Do not use when the control opens a menu (use menu.button)."]
       },
 
       "variants": [],

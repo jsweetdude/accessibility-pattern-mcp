@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkaccessibility_pattern_api_docs=globalThis.webpackChunkaccessibility_pattern_api_docs||[]).push([[3800],{4113(s){s.exports=JSON.parse('{"name":"docusaurus-plugin-content-docs","id":"main"}')}}]);

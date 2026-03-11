@@ -1,5 +1,6 @@
 ---
 id: accordion.basic
+title: Accordion
 stack: web/react
 status: beta
 tags: [accordion, disclosure, show-hide]
@@ -18,13 +19,14 @@ summary: A set of show/hide sections with heading-wrapped buttons controlling as
 ## Must Haves
 - Accordion is composed of a series of header + panel pairs.
 - Each accordion header control is a native `<button>` (or `role="button"` only when a native button cannot be used).
-  - If role="button" is used instead of a native <button>, add tabindex="0" and keyboard support for Enter and Space, ensuring Space prevents page scrolling while activating the control.
+  - If role="button" is used instead of a native `<button>`, add `tabindex="0"` and keyboard support for Enter and Space, ensuring Space prevents page scrolling while activating the control.
 - Each header button is contained within a heading element (`<h2>`–`<h6>`) or an element with `role="heading"` and the appropriate `aria-level`.
 - The header button uses `aria-expanded="true"` when its panel is visible and `"false"` when hidden.
 - The panel is shown/hidden in the DOM (e.g., via the `hidden` attribute), so that hidden content **cannot** be accessed by screen readers.
 - Users move focus between accordion headers using Tab / Shift+Tab.
 - Since the header control is a button, it is activated with Enter or Space.
 - If the accordion does not permit a panel to be collapsed while expanded, the expanded header button uses `aria-disabled="true"` (rare case).
+- Ensure a visible focus state (e.g., a 2px solid outline offset by 1-2px) around the header controls.
 
 ## Customizable
 - `aria-controls` on the header button pointing to the panel ID (recommended, but optional).

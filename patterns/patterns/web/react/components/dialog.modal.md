@@ -1,5 +1,6 @@
 ---
 id: dialog.modal
+title: "Dialog (Modal)"
 stack: web/react
 status: beta
 tags: [dialog, modal, pop-up, overlay, focus-trap, blocking]
@@ -45,8 +46,7 @@ summary: User-initiated blocking dialog that traps focus, inerts background cont
 - Background isolation:
   - Background application content **must not** be focusable or reachable by keyboard or screen readers while the dialog is open.
   - Enforce via `inert` on the app root (preferred when available) or an equivalent approach.
-- Visible focus:
-  - All focusable elements inside the dialog must have a clearly visible focus indicator.
+- Ensure a visible focus state (e.g., a 2px solid outline offset by 1-2px) on the button that triggers the dialog and any focusable elements inside the dialog.
 
 ## Customizable
 - The `<dialog>` element does not have perfect browser support yet. For this reason, we still recommend using `role="dialog"` and `aria-modal="true"`. The engineer may use `<dialog>`, but if they do, they must still include `aria-modal="true"`.
