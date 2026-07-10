@@ -135,18 +135,17 @@ export async function buildPatternIndex(
     fileTextByPath.set(p, await readTextFile(p));
   }
 
-  // Deterministic fingerprint of repo state
-  const catalog_revision =
-    "sha256:" +
-    sha256(
-      [
-        "stack:" + stack,
-        "baseline:" + baselineText,
-        "catalog:" + catalogText,
-        ...componentPaths.map((p) => `component_path:${p}`),
-        ...componentPaths.map((p) => `component_text:${fileTextByPath.get(p) ?? ""}`),
-      ].join("\n\n")
-    );
+  // The corpus's own semantic version (from patterns.json), surfaced to clients
+  // so they see e.g. "0.5.2" rather than an opaque content hash.
+  let catalog_revision = "unknown";
+  try {
+    const parsedCatalog = JSON.parse(catalogText) as { catalog_revision?: unknown };
+    if (typeof parsedCatalog.catalog_revision === "string") {
+      catalog_revision = parsedCatalog.catalog_revision;
+    }
+  } catch {
+    // leave as "unknown" if the catalog isn't valid JSON
+  }
 
   const byId = new Map<string, PatternSummary>();
   const idToPath = new Map<string, string>();

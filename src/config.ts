@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,6 +21,14 @@ export type AppConfig = {
 // root is one level up; in dev (ts-node on src/config.ts) it resolves the same.
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = path.resolve(MODULE_DIR, "..");
+
+// Canonical server identity, read once from package.json so both transports
+// (stdio and HTTP) advertise the same name and version in the MCP handshake.
+const pkg = JSON.parse(
+  readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8")
+) as { name?: string; version?: string };
+export const SERVER_NAME = pkg.name ?? "a11y-context-mcp";
+export const SERVER_VERSION = pkg.version ?? "0.0.0";
 
 /**
  * Reads configuration from environment variables.

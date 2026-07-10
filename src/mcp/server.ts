@@ -1,13 +1,13 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import { getConfig } from "../config.js";
+import { getConfig, SERVER_NAME, SERVER_VERSION } from "../config.js";
 import { createMcpServer } from "./createServer.js";
 
 export async function startMcpServer() {
   const config = getConfig();
   const server = createMcpServer({
-    name: "accessibility-pattern-mcp",
-    version: "1.0.0",
+    name: SERVER_NAME,
+    version: SERVER_VERSION,
     patternsRoot: config.patternRepoPath,
     cacheTtlSeconds: config.cacheTtlSeconds,
   });

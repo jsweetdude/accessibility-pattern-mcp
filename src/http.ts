@@ -7,22 +7,17 @@ import path from "node:path";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { createMcpServer as createSharedMcpServer } from "./mcp/createServer.js";
-
-function resolvePatternsRoot() {
-  // Key fix for prod: avoid machine-specific absolute paths.
-  // Make prod deterministic: patterns live in the repo, so resolve from cwd.
-  const rel = process.env.PATTERNS_DIR ?? "patterns";
-  return path.resolve(process.cwd(), rel);
-}
+import { getConfig, SERVER_NAME, SERVER_VERSION } from "./config.js";
 
 function createHttpMcpServer() {
+  // Use the same corpus resolution and identity as the stdio transport, so both
+  // read the bundled package corpus and advertise the same server name/version.
+  const config = getConfig();
   return createSharedMcpServer({
-    name: "accessibility-context-mcp",
-    version: process.env.CONTRACT_VERSION ?? "v1",
-    patternsRoot: resolvePatternsRoot(),
-    cacheTtlSeconds: process.env.CACHE_TTL_SECONDS
-      ? Number(process.env.CACHE_TTL_SECONDS)
-      : 60 * 60,
+    name: SERVER_NAME,
+    version: SERVER_VERSION,
+    patternsRoot: config.patternRepoPath,
+    cacheTtlSeconds: config.cacheTtlSeconds,
   });
 }
 
