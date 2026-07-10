@@ -25,9 +25,15 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
   server.registerTool(
     "list_patterns",
     {
-      description: "List accessible UI patterns for a given stack (optionally filtered by tags/query).",
+      description:
+        "List the accessible UI component patterns available for a stack. Call this FIRST whenever you are about to build or modify any UI, to choose which patterns apply. Each entry has an `id`, `summary`, `tags`, `aliases`, and a `selection_excerpt` (its `use_when` / `do_not_use_when` bullets) — use the selection_excerpt to decide which patterns match the components in your task, then call get_pattern for each. Optionally narrow with `tags` or a free-text `query`.",
       inputSchema: {
-        stack: z.string(),
+        stack: z
+          .enum(["web/react", "android/compose"])
+          .default("web/react")
+          .describe(
+            "Target platform and framework. Currently only 'web/react' is populated; defaults to 'web/react'."
+          ),
         tags: z.array(z.string()).optional(),
         query: z.string().optional(),
       },
@@ -64,9 +70,15 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
   server.registerTool(
     "get_pattern",
     {
-      description: "Get a single pattern by id for a given stack.",
+      description:
+        "Get the full accessibility specification for one pattern by `id` (ids come from list_patterns). Returns the pattern's sections: `must_haves` (non-negotiable WCAG 2.2 AA requirements — implement all of them), `donts` (anti-patterns — never produce), `golden_pattern` (a reference implementation to model), `customizable` (allowed variations), and `acceptance_checks` (observable pass/fail behaviors). Call this for each pattern you selected before writing UI code.",
       inputSchema: {
-        stack: z.string(),
+        stack: z
+          .enum(["web/react", "android/compose"])
+          .default("web/react")
+          .describe(
+            "Target platform and framework. Currently only 'web/react' is populated; defaults to 'web/react'."
+          ),
         id: z.string(),
       },
     },
@@ -98,11 +110,17 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
   );
 
   server.registerTool(
-    "get_global_rules",
+    "get_foundations",
     {
-      description: "Get global baseline rules for a given stack.",
+      description:
+        "Get the cross-cutting Foundations rules for a stack — accessibility requirements not tied to a single component: focus states, landmarks, headings, contrast, page structure, use of color. Retrieve these on every UI task, not just page-level work: each rule carries a `scope` (utility, style, component, layout, page) that determines whether it applies to the current change.",
       inputSchema: {
-        stack: z.string(),
+        stack: z
+          .enum(["web/react", "android/compose"])
+          .default("web/react")
+          .describe(
+            "Target platform and framework. Currently only 'web/react' is populated; defaults to 'web/react'."
+          ),
       },
     },
     async (args) => {
@@ -111,7 +129,7 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
         stack,
       };
       const payload = await withTelemetry({
-        tool: "get_global_rules",
+        tool: "get_foundations",
         stack,
         args: toolArgs,
         handler: async () => {

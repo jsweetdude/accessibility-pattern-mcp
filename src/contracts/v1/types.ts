@@ -135,6 +135,7 @@ export type PatternSections = {
     customizable: string[];
     donts: string[];
     golden_pattern: string | null;
+    acceptance_checks: string[];
 };
 
 /**

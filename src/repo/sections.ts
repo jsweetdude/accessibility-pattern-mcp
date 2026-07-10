@@ -16,6 +16,7 @@ export type ParsedSections = {
     customizable: string[]; // optional section in authoring; always present in output as [] if missing
     donts: string[];
     golden_pattern: string | null;
+    acceptance_checks: string[];
 };
 
 // Headings we recognize, mapped to keys in ParsedSections.
@@ -29,6 +30,7 @@ const HEADING_TO_KEY: Record<string, keyof ParsedSections> = {
     "don’ts": "donts",
     "donts": "donts",
     "golden pattern": "golden_pattern",
+    "acceptance checks": "acceptance_checks",
 };
 
 /**
@@ -55,6 +57,7 @@ export function extractSections(
         customizable: [],
         donts: [],
         golden_pattern: null,
+        acceptance_checks: [],
     };
 
     // Split by headings like: ## Something
@@ -80,6 +83,7 @@ const key = HEADING_TO_KEY[heading];
     out.must_haves = toBulletArray(rawByKey.must_haves);
     out.customizable = toBulletArray(rawByKey.customizable);
     out.donts = toBulletArray(rawByKey.donts);
+    out.acceptance_checks = toBulletArray(rawByKey.acceptance_checks);
 
     // Golden Pattern is special: keep markdown as-is (often code fences)
     const golden = (rawByKey.golden_pattern ?? "").trim();
@@ -157,6 +161,14 @@ function toBulletArray(sectionMarkdown?: string): string[] {
         const line = rawLine.replace(/\t/g, "  ");
         const trimmed = line.trim();
         if (!trimmed) continue;
+
+        // Markdown subheadings inside a section (e.g. the `### Roles & structure`
+        // concern groups within Must Haves) are structure, not bullets. Flush any
+        // active bullet and skip the heading so it isn't concatenated into text.
+        if (/^#{1,6}\s/.test(trimmed)) {
+            flushCurrent();
+            continue;
+        }
 
         // One-level nested bullets must be handled before top-level matching.
         const nestedMatch = line.match(/^\s{2,}[-*]\s+(.*)$/);
