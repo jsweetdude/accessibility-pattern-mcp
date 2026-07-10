@@ -19,16 +19,13 @@ export function getRepoPaths(patternRepoPath: string, stack: StackRef): RepoPath
     throw new Error(`Invalid stack format: ${stack}. Expected "group/name" like "web/react".`);
   }
 
-  // Content repo structure examples:
-  // patterns/web/react/global/global_rules.md
-  // patterns/web/react/components/*.md
-  // patterns/web/react/patterns.json
-  //
-  // patterns/android/compose/global/global_rules.md
-  // patterns/android/compose/components/*.md
-  // patterns/android/compose/patterns.json
+  // Corpus structure (bundled at <package>/corpus, or an override root):
+  //   <root>/web/react/global/global_rules.md
+  //   <root>/web/react/components/*.md
+  //   <root>/web/react/patterns.json
+  //   <root>/android/compose/...   (when populated)
 
-  const root = path.join(patternRepoPath, "patterns", ...parts);
+  const root = path.join(patternRepoPath, ...parts);
 
   return {
     baselinePath: path.join(root, "global", "global_rules.md"),
