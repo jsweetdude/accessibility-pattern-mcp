@@ -1,5 +1,6 @@
 import { ListPatternsResponse, PatternSummary, StackRef } from "../contracts/v1/types.js";
 import { PatternIndex } from "../repo/index.js";
+import { ToolFailure, ERROR_CODES } from "../mcp/errors.js";
 
 export type ListPatternsArgs = {
   stack: StackRef;
@@ -11,7 +12,10 @@ export function listPatterns(index: PatternIndex, args: ListPatternsArgs): ListP
   const { stack, tags, query } = args;
 
   if (stack !== index.stack) {
-    throw new Error(`Stack mismatch. Index=${index.stack}, requested=${stack}`);
+    throw new ToolFailure(
+      ERROR_CODES.STACK_INVALID,
+      `Stack mismatch. Index='${index.stack}', requested='${stack}'.`
+    );
   }
 
   let results = index.all;

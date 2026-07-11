@@ -1,6 +1,7 @@
 import { readTextFile } from "../utils/fs.js";
 import { getRepoPaths } from "../repo/paths.js";
 import { PatternIndex } from "../repo/index.js";
+import { ToolFailure, ERROR_CODES } from "../mcp/errors.js";
 import { GetGlobalRulesResponse, StackRef, RuleScope } from "../contracts/v1/types.js";
 import { parseGlobalRulesMarkdown } from "../repo/globalRules.js";
 
@@ -22,7 +23,10 @@ export async function getGlobalRules(
   const { stack } = args;
 
   if (stack !== index.stack) {
-    throw new Error(`Stack mismatch. Index=${index.stack}, requested=${stack}`);
+    throw new ToolFailure(
+      ERROR_CODES.STACK_INVALID,
+      `Stack mismatch. Index='${index.stack}', requested='${stack}'.`
+    );
   }
 
   const scopeFilter = normalizeScope(args.scope);

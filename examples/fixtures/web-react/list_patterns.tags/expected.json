@@ -1,0 +1,112 @@
+{
+  "cache_ttl_seconds": 86400,
+  "contract_version": "1.0",
+  "count": 3,
+  "patterns": [
+    {
+      "aliases": [
+        "actions menu",
+        "command menu",
+        "context menu button",
+        "kebab menu",
+        "menu button",
+        "more menu",
+        "overflow menu",
+        "three-dot menu"
+      ],
+      "id": "menu.basic",
+      "selection_excerpt": {
+        "do_not_use_when": [
+          "Do not use when the items are links or navigate to a URL (use navigation-menu.dropdown, or for a primary navigation bar use navigation-menu.",
+          "Do not use when the user picks a value to submit in a form (use select.native, or for type-to-filter selection use combobox.autocomplete).",
+          "Do not use when the trigger shows and hides arbitrary content rather than a list of commands (use disclosure.basic)."
+        ],
+        "use_when": [
+          "Use when a button reveals a set of in-place commands or actions (e.g., \"Rename\", \"Duplicate\", \"Delete\", \"Export\").",
+          "Use when a button exposes an overflow (\"...\") or kebab action menu on a toolbar, card, or table row.",
+          "Use when the items perform actions in place, not navigation to a URL."
+        ]
+      },
+      "stack": "web/react",
+      "status": "beta",
+      "summary": "A button that opens a menu of commands using role='menu' and role='menuitem', with roving tabindex focus management and the full menu keyboard contract.",
+      "tags": [
+        "actions-menu",
+        "commands",
+        "kebab-menu",
+        "menu",
+        "overflow-menu",
+        "roving-tabindex"
+      ]
+    },
+    {
+      "aliases": [
+        "app menu bar",
+        "application menu bar",
+        "command bar",
+        "desktop menu bar",
+        "editor menu bar",
+        "file edit view menu",
+        "menu bar"
+      ],
+      "id": "menu.menubar",
+      "selection_excerpt": {
+        "do_not_use_when": [
+          "Do not use when the bar is site or app navigation of any kind, including a nav bar styled to look like a menu bar or with fly-out submenus;",
+          "Do not use when a single button opens one action menu (use menu.basic).",
+          "Do not use when the user picks a value from a set (use select.native)."
+        ],
+        "use_when": [
+          "Use when building a genuine desktop-application-style command bar that replicates an operating-system menu bar of commands (e.g., a web-base",
+          "Use when the items are application commands, not navigation destinations (e.g., \"New File\", \"Undo\", \"Toggle Sidebar\").",
+          "Use when the surface is a persistent bar of multiple always-visible top-level menus, not a single button that opens one menu (e.g., a File/E"
+        ]
+      },
+      "stack": "web/react",
+      "status": "beta",
+      "summary": "A persistent horizontal bar of application command menus using role=\"menubar\", role=\"menu\", and role=\"menuitem\", for desktop-application command surfaces only, never site navigation.",
+      "tags": [
+        "application",
+        "command-bar",
+        "keyboard-navigation",
+        "menu",
+        "menubar",
+        "roving-tabindex"
+      ]
+    },
+    {
+      "aliases": [
+        "disclosure navigation",
+        "flyout menu",
+        "header dropdown",
+        "mega menu (simple)",
+        "nav dropdown"
+      ],
+      "id": "navigation-menu.basic",
+      "selection_excerpt": {
+        "do_not_use_when": [
+          "Do not use when you are building a desktop-application command bar with arrow-key navigation and roving tabindex (use menu.menubar).",
+          "Do not use to select a value within a form (use select.native or combobox.autocomplete when searchable).",
+          "Do not use as the mobile or responsive version of a navigation menu."
+        ],
+        "use_when": [
+          "Use when a website's top-level navigation contains at least one sub-menu of links.",
+          "Use for primary or secondary navigation regions (e.g., header nav, section nav) when the same link + sub-menu structure is needed.",
+          "Use when the navigation structure maps to a sitemap-like set of destinations."
+        ]
+      },
+      "stack": "web/react",
+      "status": "beta",
+      "summary": "A non-modal header navigation pattern that supports top-level links and optional sub-menus. Uses disclosure-style toggles (buttons) with aria-expanded/controls and Tab-based navigation (no roving focus / no role=menu).",
+      "tags": [
+        "disclosure",
+        "flyout",
+        "header",
+        "menu",
+        "navigation",
+        "sitemap"
+      ]
+    }
+  ],
+  "stack": "web/react"
+}

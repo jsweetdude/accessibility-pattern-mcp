@@ -3,6 +3,7 @@ import matter from "gray-matter";
 import { readTextFile } from "../utils/fs.js";
 import { extractSections } from "../repo/sections.js";
 import { makeRelativePath, PatternIndex } from "../repo/index.js";
+import { ToolFailure, ERROR_CODES } from "../mcp/errors.js";
 import { StackRef, GetPatternResponse, PatternStatus, PatternDetail } from "../contracts/v1/types.js";
 
 export type GetPatternArgs = {
@@ -18,14 +19,21 @@ export async function getPattern(
   const { stack, id } = args;
 
   if (stack !== index.stack) {
-    throw new Error(`Stack mismatch. Index=${index.stack}, requested=${stack}`);
+    throw new ToolFailure(
+      ERROR_CODES.STACK_INVALID,
+      `Stack mismatch. Index='${index.stack}', requested='${stack}'.`
+    );
   }
 
   const filePath = index.idToPath.get(id);
   if (!filePath) {
-    throw new Error(`PATTERN_NOT_FOUND: No pattern with id '${id}' for stack '${stack}'`);
+    throw new ToolFailure(
+      ERROR_CODES.PATTERN_NOT_FOUND,
+      `No pattern with id '${id}' for stack '${stack}'.`
+    );
   }
 
+  const relPath = makeRelativePath(patternRepoPath, filePath);
   const raw = await readTextFile(filePath);
 
   const parsed = matter(raw);
@@ -40,20 +48,32 @@ export async function getPattern(
   const tags = Array.isArray(data.tags) ? data.tags.map(String) : [];
   const aliases = Array.isArray(data.aliases) ? data.aliases.map(String) : [];
 
-  if (!patternId) throw new Error(`Pattern missing 'id' in frontmatter: ${filePath}`);
+  if (!patternId)
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Pattern missing 'id' in frontmatter: ${relPath}`
+    );
   if (patternId !== id) {
-    throw new Error(`Pattern id mismatch. Requested '${id}', file declares '${patternId}' (${filePath})`);
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Pattern id mismatch. Requested '${id}', file declares '${patternId}' (${relPath}).`
+    );
   }
 
   // Optional but strongly recommended: validate declared stack matches folder stack
   const declaredStack = String(data.stack ?? "").trim();
   if (declaredStack && declaredStack !== stack) {
-    throw new Error(
-      `Pattern '${id}' declares stack='${declaredStack}' but is served under stack='${stack}'. File: ${filePath}`
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Pattern '${id}' declares stack='${declaredStack}' but is served under stack='${stack}' (${relPath}).`
     );
   }
 
-  if (!summary) throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
+  if (!summary)
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Pattern missing 'summary' in frontmatter: ${relPath}`
+    );
 
   const sections = extractSections(parsed.content);
 
@@ -66,7 +86,7 @@ export async function getPattern(
     aliases,
     sections,
     source: {
-      relative_path: makeRelativePath(patternRepoPath, filePath),
+      relative_path: relPath,
     },
   };
 
