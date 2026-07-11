@@ -7,30 +7,32 @@ export type IndexCache = {
   clear(stack?: StackRef): void;
 };
 
+/**
+ * Lazy singleton index cache, keyed by stack.
+ *
+ * The bundled corpus is static for the life of the process, so once a stack's
+ * index is built we keep it — no TTL, no periodic re-glob/re-parse. We memoize
+ * the in-flight Promise (not just the resolved value) so concurrent first-hits
+ * dedupe onto a single build instead of racing several.
+ */
 export function createIndexCache(params: {
   patternRepoPath: string;
   cacheTtlSeconds: number;
 }): IndexCache {
   const { patternRepoPath, cacheTtlSeconds } = params;
 
-  const store = new Map<StackRef, { index: PatternIndex; builtAtMs: number }>();
+  const store = new Map<StackRef, Promise<PatternIndex>>();
 
-  async function getIndex(stack: StackRef): Promise<PatternIndex> {
-    const now = Date.now();
-    const cached = store.get(stack);
-
-    // If we have it and it's fresh enough, reuse it.
-    if (cached) {
-      const ageSeconds = (now - cached.builtAtMs) / 1000;
-      if (ageSeconds < cacheTtlSeconds) {
-        return cached.index;
-      }
+  function getIndex(stack: StackRef): Promise<PatternIndex> {
+    let inflight = store.get(stack);
+    if (!inflight) {
+      inflight = buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds);
+      // If the build rejects (e.g. an unpopulated stack), evict so a later call
+      // can retry rather than caching the rejection for the whole process life.
+      inflight.catch(() => store.delete(stack));
+      store.set(stack, inflight);
     }
-
-    // Otherwise rebuild
-    const index = await buildPatternIndex(patternRepoPath, stack, cacheTtlSeconds);
-    store.set(stack, { index, builtAtMs: now });
-    return index;
+    return inflight;
   }
 
   function clear(stack?: StackRef) {
@@ -39,4 +41,23 @@ export function createIndexCache(params: {
   }
 
   return { getIndex, clear };
+}
+
+// Process-level memoization keyed by corpus path, so every server instance
+// (the single stdio server, or a per-request HTTP server) shares one cache.
+// The index is built at most once per process per stack — not once per server
+// or per HTTP session.
+const sharedCaches = new Map<string, IndexCache>();
+
+export function getIndexCache(params: {
+  patternRepoPath: string;
+  cacheTtlSeconds: number;
+}): IndexCache {
+  const key = params.patternRepoPath;
+  let cache = sharedCaches.get(key);
+  if (!cache) {
+    cache = createIndexCache(params);
+    sharedCaches.set(key, cache);
+  }
+  return cache;
 }

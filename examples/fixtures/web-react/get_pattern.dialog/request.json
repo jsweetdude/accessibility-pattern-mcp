@@ -1,0 +1,7 @@
+{
+  "tool": "get_pattern",
+  "args": {
+    "stack": "web/react",
+    "id": "dialog.modal"
+  }
+}

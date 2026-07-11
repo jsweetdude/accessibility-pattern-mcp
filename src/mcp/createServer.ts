@@ -1,13 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { StackRef } from "../contracts/v1/types.js";
-import { createIndexCache } from "../repo/cache.js";
+import { RuleScope, StackRef } from "../contracts/v1/types.js";
+import { PACKAGE_ROOT } from "../config.js";
+import { getIndexCache } from "../repo/cache.js";
 import { getGlobalRules } from "../tools/getGlobalRules.js";
 import { getPattern } from "../tools/getPattern.js";
 import { listPatterns } from "../tools/listPatterns.js";
 import { withTelemetry } from "../telemetryWrap.js";
 import { jsonResult } from "./response.js";
+import { toErrorResult } from "./errors.js";
 
 type CreateMcpServerOptions = {
   name: string;
@@ -17,10 +19,16 @@ type CreateMcpServerOptions = {
 };
 
 function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "patternsRoot" | "cacheTtlSeconds">) {
-  const cache = createIndexCache({
+  const cache = getIndexCache({
     patternRepoPath: opts.patternsRoot,
     cacheTtlSeconds: opts.cacheTtlSeconds,
   });
+
+  // Absolute roots whose prefixes must never leak in a client-facing error.
+  // Any throw inside a handler is converted to a structured, client-safe error
+  // result ({ error_code, message }, isError: true) via toErrorResult(err, scrubRoots)
+  // instead of an SDK error carrying a raw message with absolute host paths.
+  const scrubRoots = [opts.patternsRoot, PACKAGE_ROOT];
 
   server.registerTool(
     "list_patterns",
@@ -39,31 +47,35 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
       },
     },
     async (args) => {
-      const stack = args.stack as StackRef;
-      const toolArgs = {
-        stack,
-        tags: args.tags as string[] | undefined,
-        query: args.query as string | undefined,
-      };
-      const payload = await withTelemetry({
-        tool: "list_patterns",
-        stack,
-        args: toolArgs,
-        handler: async () => {
-          const index = await cache.getIndex(stack);
-          return listPatterns(index, {
-            stack,
-            tags: args.tags as string[] | undefined,
-            query: args.query as string | undefined,
-          });
-        },
-        summarizeResult: (result) => ({
-          count: result.count,
-          cache_ttl_seconds: result.cache_ttl_seconds,
-          catalog_revision: result.catalog_revision,
-        }),
-      });
-      return jsonResult(payload);
+      try {
+        const stack = args.stack as StackRef;
+        const toolArgs = {
+          stack,
+          tags: args.tags as string[] | undefined,
+          query: args.query as string | undefined,
+        };
+        const payload = await withTelemetry({
+          tool: "list_patterns",
+          stack,
+          args: toolArgs,
+          handler: async () => {
+            const index = await cache.getIndex(stack);
+            return listPatterns(index, {
+              stack,
+              tags: args.tags as string[] | undefined,
+              query: args.query as string | undefined,
+            });
+          },
+          summarizeResult: (result) => ({
+            count: result.count,
+            cache_ttl_seconds: result.cache_ttl_seconds,
+            catalog_revision: result.catalog_revision,
+          }),
+        });
+        return jsonResult(payload);
+      } catch (err) {
+        return toErrorResult(err, scrubRoots);
+      }
     }
   );
 
@@ -83,29 +95,33 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
       },
     },
     async (args) => {
-      const stack = args.stack as StackRef;
-      const toolArgs = {
-        stack,
-        id: String(args.id),
-      };
-      const payload = await withTelemetry({
-        tool: "get_pattern",
-        stack,
-        args: toolArgs,
-        handler: async () => {
-          const index = await cache.getIndex(stack);
-          return getPattern(index, opts.patternsRoot, {
-            stack,
-            id: String(args.id),
-          });
-        },
-        summarizeResult: (result) => ({
-          pattern_id: result.pattern.id,
-          cache_ttl_seconds: result.cache_ttl_seconds,
-          catalog_revision: result.catalog_revision,
-        }),
-      });
-      return jsonResult(payload);
+      try {
+        const stack = args.stack as StackRef;
+        const toolArgs = {
+          stack,
+          id: String(args.id),
+        };
+        const payload = await withTelemetry({
+          tool: "get_pattern",
+          stack,
+          args: toolArgs,
+          handler: async () => {
+            const index = await cache.getIndex(stack);
+            return getPattern(index, opts.patternsRoot, {
+              stack,
+              id: String(args.id),
+            });
+          },
+          summarizeResult: (result) => ({
+            pattern_id: result.pattern.id,
+            cache_ttl_seconds: result.cache_ttl_seconds,
+            catalog_revision: result.catalog_revision,
+          }),
+        });
+        return jsonResult(payload);
+      } catch (err) {
+        return toErrorResult(err, scrubRoots);
+      }
     }
   );
 
@@ -113,7 +129,7 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
     "get_foundations",
     {
       description:
-        "Get the cross-cutting Foundations rules for a stack — accessibility requirements not tied to a single component: focus states, landmarks, headings, contrast, page structure, use of color. Retrieve these on every UI task, not just page-level work: each rule carries a `scope` (utility, style, component, layout, page) that determines whether it applies to the current change.",
+        "Get the cross-cutting Foundations rules for a stack — accessibility requirements not tied to a single component: focus states, landmarks, headings, contrast, page structure, use of color. Retrieve these on every UI task, not just page-level work: each rule carries a `scope` (utility, style, component, layout, page) that determines whether it applies to the current change. Optionally pass `scope` to return only rules matching one or more of those buckets.",
       inputSchema: {
         stack: z
           .enum(["web/react", "android/compose"])
@@ -121,28 +137,40 @@ function registerTools(server: McpServer, opts: Pick<CreateMcpServerOptions, "pa
           .describe(
             "Target platform and framework. Currently only 'web/react' is populated; defaults to 'web/react'."
           ),
+        scope: z
+          .array(z.enum(["utility", "style", "component", "layout", "page"]))
+          .optional()
+          .describe(
+            "Optional. Return only rules whose `scope` includes at least one of these buckets. Omit to get all rules."
+          ),
       },
     },
     async (args) => {
-      const stack = args.stack as StackRef;
-      const toolArgs = {
-        stack,
-      };
-      const payload = await withTelemetry({
-        tool: "get_foundations",
-        stack,
-        args: toolArgs,
-        handler: async () => {
-          const index = await cache.getIndex(stack);
-          return getGlobalRules(index, opts.patternsRoot, { stack });
-        },
-        summarizeResult: (result) => ({
-          rules_count: Array.isArray(result.rules.items) ? result.rules.items.length : 0,
-          cache_ttl_seconds: result.cache_ttl_seconds,
-          catalog_revision: result.catalog_revision,
-        }),
-      });
-      return jsonResult(payload);
+      try {
+        const stack = args.stack as StackRef;
+        const scope = args.scope as RuleScope[] | undefined;
+        const toolArgs = {
+          stack,
+          scope,
+        };
+        const payload = await withTelemetry({
+          tool: "get_foundations",
+          stack,
+          args: toolArgs,
+          handler: async () => {
+            const index = await cache.getIndex(stack);
+            return getGlobalRules(index, opts.patternsRoot, { stack, scope });
+          },
+          summarizeResult: (result) => ({
+            rules_count: Array.isArray(result.rules.items) ? result.rules.items.length : 0,
+            cache_ttl_seconds: result.cache_ttl_seconds,
+            catalog_revision: result.catalog_revision,
+          }),
+        });
+        return jsonResult(payload);
+      } catch (err) {
+        return toErrorResult(err, scrubRoots);
+      }
     }
   );
 }

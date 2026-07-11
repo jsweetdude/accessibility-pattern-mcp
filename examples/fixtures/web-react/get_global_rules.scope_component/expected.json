@@ -1,0 +1,176 @@
+{
+  "cache_ttl_seconds": 86400,
+  "contract_version": "1.0",
+  "meta": {
+    "apply_policy": {
+      "instruction": "Apply all MUST rules that match the current change scope. If the task does not touch a scope, do not introduce unrelated changes.",
+      "scopes_in_order": [
+        "component",
+        "layout",
+        "page",
+        "style",
+        "utility"
+      ]
+    },
+    "cache_ttl_seconds": 86400,
+    "id": "global_ruleset.baseline",
+    "rule_set": "baseline",
+    "stack": "web/react",
+    "status": "beta",
+    "summary": "Baseline accessibility rules applied across most UI work."
+  },
+  "rules": {
+    "items": [
+      {
+        "acceptance_checks": [
+          "Tabbing or arrowing to any focusable element leaves at least part of that element and its focus indicator visible, not fully covered by sticky or overlapping content. ---"
+        ],
+        "donts": [
+          "Do not let a sticky or floating region overlap and fully conceal the element that currently has keyboard focus."
+        ],
+        "id": "global.focus-not-obscured",
+        "must_haves": [
+          "When a component receives keyboard focus, the focused element is not entirely hidden by author-created content such as sticky headers, sticky footers, or the component's own overlapping chrome (WCAG 2.4.11 Focus Not Obscured, Minimum).",
+          "Components with their own sticky or floating sub-regions (e.g., a frozen header row or column) keep the focused element scrolled or offset into a visible area."
+        ],
+        "scope": [
+          "component",
+          "layout",
+          "style"
+        ],
+        "snippets": [],
+        "title": "Focus Not Obscured"
+      },
+      {
+        "acceptance_checks": [
+          "Every keyboard-focusable component shows a visible focus indicator when reached by keyboard navigation.",
+          "The visible focus indicator remains present while the component has keyboard focus.",
+          "The focus indicator has at least 3:1 contrast against adjacent colors.",
+          "If a custom focus style is used, it is clearly visible and does not make focus harder to perceive than the default browser or platform behavior.",
+          "Hover alone is not the only visible cue for the currently focused element.",
+          "With Windows High Contrast Mode active (or emulated via a browser dev-tool forced-colors setting), the focus indicator remains clearly visible using the system `Highlight` color."
+        ],
+        "donts": [
+          "Do not use a focus indicator whose color blends into adjacent colors below the required 3:1 contrast ratio.",
+          "Do not make the focus indicator so subtle that users cannot quickly identify which element currently has focus.",
+          "Do not rely on hover-only styles as the only visible indicator of focus.",
+          "Do not ship focus styles without a `forced-colors` override — Windows High Contrast Mode users will lose the custom colors and be left with browser defaults that may not match the design's contrast intent."
+        ],
+        "id": "global.focus-states",
+        "must_haves": [
+          "Each keyboard-focusable user interface component must have a visible focus indicator when it receives keyboard focus.",
+          "The focus indicator must have a contrast ratio of at least 3:1 against adjacent colors."
+        ],
+        "scope": [
+          "component",
+          "style"
+        ],
+        "snippets": [
+          {
+            "code": ":focus-visible {\n  outline: 2px solid var(--focus-ring-color, #1a73e8);\n  outline-offset: 2px;\n  box-shadow: 0 0 0 4px #fff;\n}",
+            "language": "css"
+          },
+          {
+            "code": ":focus-visible {\n  outline: 2px solid var(--focus-ring-color, #1a73e8);\n  outline-offset: 2px;\n}",
+            "language": "css"
+          },
+          {
+            "code": "@media (forced-colors: active) {\n  :focus-visible {\n    outline: 2px solid Highlight;\n    outline-offset: 2px;\n    box-shadow: none;\n  }\n}",
+            "language": "css"
+          }
+        ],
+        "title": "Focus States"
+      },
+      {
+        "acceptance_checks": [
+          "Visible UI controls and authored state indicators needed for perception meet at least 3:1 contrast against adjacent colors.",
+          "Meaningful icons and other non-text graphics needed for understanding meet at least 3:1 contrast against adjacent colors. ---"
+        ],
+        "donts": [
+          "Do not use very low-contrast borders, outlines, or icons when they are necessary to identify a control or its current state."
+        ],
+        "id": "global.non-text-contrast",
+        "must_haves": [
+          "Visual information needed to identify a user interface component - such as control boundaries - must have a contrast ratio of at least 3:1 against adjacent colors.\n  - In other words, a component's border or background color must contrast at least 3:1 against the page's background color.",
+          "Meaningful graphical objects must have a contrast ratio of at least 3:1 against adjacent colors when their appearance is needed to understand the content.\n  - This includes meaningful icons, simple charts, data marks, indicators, and other non-decorative graphics."
+        ],
+        "scope": [
+          "component",
+          "page",
+          "style"
+        ],
+        "snippets": [],
+        "title": "Non-text Contrast"
+      },
+      {
+        "acceptance_checks": [
+          "Where offscreen text is implemented, it is not overridden by `aria-labelledby` or `aria-label`. ---"
+        ],
+        "donts": [
+          "Do not hide offscreen text using `display: none` or `visibility: hidden` when it is needed for an accessible name."
+        ],
+        "id": "global.sr-only",
+        "must_haves": [
+          "Where a component's rules dictate the use of \"offscreen text\", then the snippet below must be included as a CSS class: `.sr-only`.",
+          "Offscreen text may be used as an alternative to `aria-labelledby` or `aria-label`."
+        ],
+        "scope": [
+          "component",
+          "style",
+          "utility"
+        ],
+        "snippets": [
+          {
+            "code": ".sr-only {\n  clip: rect(1px,1px,1px,1px);\n  height: 1px;\n  overflow: hidden;\n  position: absolute;\n  white-space: nowrap;\n  width: 1px;\n  user-select: none;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n}",
+            "language": "css"
+          }
+        ],
+        "title": "Offscreen Text Utility (sr-only)"
+      },
+      {
+        "acceptance_checks": [
+          "Normal text meets at least 4.5:1 contrast against its background.",
+          "Large-scale text meets at least 3:1 contrast against its background. ---"
+        ],
+        "donts": [
+          "Do not use color combinations for text that fall below 4.5:1 for normal text or 3:1 for large text."
+        ],
+        "id": "global.text-contrast",
+        "must_haves": [
+          "Text and images of text must have sufficient contrast against their background.\n  - Normal-size text must meet a contrast ratio of at least 4.5:1.\n  - Large-scale text (18pt regular, or 14pt bold) must meet a contrast ratio of at least 3:1."
+        ],
+        "scope": [
+          "component",
+          "layout",
+          "page",
+          "style"
+        ],
+        "snippets": [],
+        "title": "Text Contrast"
+      },
+      {
+        "acceptance_checks": [
+          "Every meaningful state the component renders is perceivable without relying on color (verify in grayscale). ---"
+        ],
+        "donts": [
+          "Do not signal selection, validity, current-ness, or availability by color alone."
+        ],
+        "id": "global.use-of-color",
+        "must_haves": [
+          "Do not use color as the only visual means of conveying information, indicating an action, prompting a response, or distinguishing a visual element (WCAG 1.4.1).",
+          "When a component renders a meaningful state visually (e.g., selected, active, current, invalid, pressed), that state is distinguishable by something in addition to color, such as an icon, checkmark, shape, underline, or text.\n  - This is the visual counterpart to exposing the state programmatically. A component may satisfy `aria-selected` yet still fail 1.4.1 if selection is shown by a background tint alone."
+        ],
+        "scope": [
+          "component",
+          "style"
+        ],
+        "snippets": [],
+        "title": "Use of Color"
+      }
+    ],
+    "scope_filter": [
+      "component"
+    ]
+  },
+  "stack": "web/react"
+}

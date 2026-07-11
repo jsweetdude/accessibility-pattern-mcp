@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { getRepoPaths } from "./paths.js";
 import { readTextFile, fileExists, toPosixPath } from "../utils/fs.js";
-import { sha256 } from "../utils/hash.js";
+import { ToolFailure, ERROR_CODES } from "../mcp/errors.js";
 import {
   CacheMeta,
   PatternStatus,
@@ -71,7 +71,7 @@ function buildCatalogSelectionMap(catalogText: string): Map<string, SelectionExc
   try {
     parsed = JSON.parse(catalogText);
   } catch {
-    throw new Error("patterns.json is not valid JSON.");
+    throw new ToolFailure(ERROR_CODES.CORPUS_UNAVAILABLE, "patterns.json is not valid JSON.");
   }
 
   const parsedObj = parsed as { patterns?: unknown; items?: unknown } | null;
@@ -112,13 +112,19 @@ export async function buildPatternIndex(
   const { baselinePath, catalogPath, componentsGlob } = getRepoPaths(patternRepoPath, stack);
 
   if (!(await fileExists(baselinePath))) {
-    throw new Error(`Missing baseline file: ${baselinePath}`);
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Missing baseline file for stack '${stack}': ${makeRelativePath(patternRepoPath, baselinePath)}`
+    );
   }
   if (!(await fileExists(catalogPath))) {
-    throw new Error(`Missing catalog file: ${catalogPath}`);
+    throw new ToolFailure(
+      ERROR_CODES.CORPUS_UNAVAILABLE,
+      `Missing catalog file for stack '${stack}': ${makeRelativePath(patternRepoPath, catalogPath)}`
+    );
   }
 
-  // Deterministic ordering: sort file paths before reading/hashing/parsing
+  // Deterministic ordering: sort file paths before reading/parsing
   const componentPaths = (await fg(componentsGlob, { onlyFiles: true, unique: true }))
     .map(toPosixPath)
     .sort((a: string, b: string) => a.localeCompare(b));
@@ -127,7 +133,7 @@ export async function buildPatternIndex(
   const catalogText = await readTextFile(catalogPath);
   const selectionById = buildCatalogSelectionMap(catalogText);
 
-  // Read each component once; reuse both for hashing and parsing
+  // Read each component once, then parse from the cached text.
   const fileTextByPath = new Map<string, string>();
   for (const p of componentPaths) {
     // NOTE: componentPaths are POSIX normalized; ensure readTextFile can handle them on Windows.
@@ -152,15 +158,19 @@ export async function buildPatternIndex(
   const all: PatternSummary[] = [];
 
   for (const filePath of componentPaths) {
+    const relPath = makeRelativePath(patternRepoPath, filePath);
     const raw = fileTextByPath.get(filePath);
-    if (raw == null) throw new Error(`Internal error: missing cached text for ${filePath}`);
+    if (raw == null) throw new Error(`Internal error: missing cached text for ${relPath}`);
 
     const parsed = matter(raw);
     const data = parsed.data as Record<string, unknown>;
 
     const id = String(data.id ?? "").trim();
     if (!id) {
-      throw new Error(`Pattern missing 'id' in frontmatter: ${filePath}`);
+      throw new ToolFailure(
+        ERROR_CODES.CORPUS_UNAVAILABLE,
+        `Pattern missing 'id' in frontmatter: ${relPath}`
+      );
     }
 
     const declaredStack = String(data.stack ?? "").trim();
@@ -171,18 +181,23 @@ export async function buildPatternIndex(
     const aliases = Array.isArray(data.aliases) ? data.aliases.map(String) : [];
 
     if (declaredStack && declaredStack !== stack) {
-      throw new Error(
-        `Pattern ${id} declares stack=${declaredStack} but is located under stack=${stack}`
+      throw new ToolFailure(
+        ERROR_CODES.CORPUS_UNAVAILABLE,
+        `Pattern '${id}' declares stack='${declaredStack}' but is located under stack='${stack}' (${relPath}).`
       );
     }
     if (!summary) {
-      throw new Error(`Pattern missing 'summary' in frontmatter: ${filePath}`);
+      throw new ToolFailure(
+        ERROR_CODES.CORPUS_UNAVAILABLE,
+        `Pattern missing 'summary' in frontmatter: ${relPath}`
+      );
     }
 
     const allowed: PatternStatus[] = ["alpha", "beta", "stable", "deprecated"];
     if (!allowed.includes(status)) {
-      throw new Error(
-        `Invalid status '${status}' in ${filePath}. Allowed: ${allowed.join(", ")}`
+      throw new ToolFailure(
+        ERROR_CODES.CORPUS_UNAVAILABLE,
+        `Invalid status '${status}' in ${relPath}. Allowed: ${allowed.join(", ")}`
       );
     }
 
@@ -199,7 +214,10 @@ export async function buildPatternIndex(
     };
 
     if (byId.has(id)) {
-      throw new Error(`Duplicate pattern id '${id}' found. Second copy: ${filePath}`);
+      throw new ToolFailure(
+        ERROR_CODES.CORPUS_UNAVAILABLE,
+        `Duplicate pattern id '${id}' found. Second copy: ${relPath}`
+      );
     }
 
     byId.set(id, pattern);

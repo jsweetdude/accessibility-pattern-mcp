@@ -1,0 +1,7 @@
+{
+  "tool": "list_patterns",
+  "args": {
+    "stack": "web/react",
+    "tags": ["menu"]
+  }
+}

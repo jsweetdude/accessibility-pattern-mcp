@@ -1,37 +1,34 @@
-/* scripts/regression-utils.ts */
+/* scripts/regression-utils.mjs */
 import fs from "node:fs";
 
-export function loadJson<T>(filePath: string): T {
+export function loadJson(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  return JSON.parse(raw) as T;
+  return JSON.parse(raw);
 }
 
-export function stableStringify(value: any): string {
+export function stableStringify(value) {
   return JSON.stringify(value, null, 2);
 }
 
 // Deep-sort object keys (does NOT reorder arrays)
-export function deepSortObjectKeys(input: any): any {
+export function deepSortObjectKeys(input) {
   if (Array.isArray(input)) return input.map(deepSortObjectKeys);
   if (input && typeof input === "object") {
     const keys = Object.keys(input).sort();
-    const out: any = {};
+    const out = {};
     for (const k of keys) out[k] = deepSortObjectKeys(input[k]);
     return out;
   }
   return input;
 }
 
-export function normalizeForSnapshot(
-  input: any,
-  opts: { ignoreCacheTtl: boolean }
-): any {
+export function normalizeForSnapshot(input, opts) {
   return walk(input);
 
-  function walk(v: any): any {
+  function walk(v) {
     if (Array.isArray(v)) return v.map(walk);
     if (v && typeof v === "object") {
-      const out: any = {};
+      const out = {};
       for (const [k, val] of Object.entries(v)) {
         if (k === "catalog_revision") continue;
         if (opts.ignoreCacheTtl && k === "cache_ttl_seconds") continue;
@@ -44,12 +41,9 @@ export function normalizeForSnapshot(
 }
 
 /**
- * Contract-ish validation (kept minimal, but aligned to your v1 types).
+ * Contract-ish validation (kept minimal, but aligned to the v1 types).
  */
-export function validateToolResponseShape(
-  tool: "list_patterns" | "get_pattern" | "get_global_rules",
-  resp: any
-) {
+export function validateToolResponseShape(tool, resp) {
   if (!resp || typeof resp !== "object") {
     throw new Error(`Tool response is not an object for ${tool}`);
   }
@@ -58,7 +52,7 @@ export function validateToolResponseShape(
     throw new Error(`${tool}: missing/invalid contract_version (expected "1.0")`);
   }
 
-  // Cache meta present on all responses in your design
+  // Cache meta present on all responses in the design
   if (typeof resp.cache_ttl_seconds !== "number") {
     throw new Error(`${tool}: missing/invalid cache_ttl_seconds`);
   }
@@ -74,7 +68,7 @@ export function validateToolResponseShape(
 
       // Minimal PatternSummary keys
       for (const p of resp.patterns) {
-        for (const key of ["id", "stack", "status", "summary", "tags", "aliases"] as const) {
+        for (const key of ["id", "stack", "status", "summary", "tags", "aliases"]) {
           if (!(key in p)) throw new Error(`list_patterns: pattern missing '${key}'`);
         }
         if (!Array.isArray(p.tags)) throw new Error(`list_patterns: tags must be array`);
@@ -88,7 +82,7 @@ export function validateToolResponseShape(
         throw new Error(`get_pattern: missing 'pattern' object`);
       }
       const p = resp.pattern;
-      for (const key of ["id", "stack", "status", "summary", "tags", "aliases", "sections"] as const) {
+      for (const key of ["id", "stack", "status", "summary", "tags", "aliases", "sections"]) {
         if (!(key in p)) throw new Error(`get_pattern: pattern missing '${key}'`);
       }
       const s = p.sections;
@@ -99,7 +93,7 @@ export function validateToolResponseShape(
         "customizable",
         "donts",
         "golden_pattern",
-      ] as const) {
+      ]) {
         if (!(key in s)) throw new Error(`get_pattern: sections missing '${key}'`);
       }
       if (!Array.isArray(s.customizable)) throw new Error(`get_pattern: customizable must be array`);

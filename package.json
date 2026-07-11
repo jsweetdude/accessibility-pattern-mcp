@@ -1,6 +1,6 @@
 {
   "name": "@a11y-context/mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Model Context Protocol server that serves the A11y Context accessibility-pattern corpus (WCAG 2.2 AA patterns, Foundations rules) to AI coding agents.",
   "type": "module",
   "main": "dist/index.js",
@@ -11,6 +11,7 @@
     "dist/",
     "corpus/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
@@ -23,9 +24,11 @@
     "dev:http": "tsx watch src/http.ts",
     "inspector": "npm run build && mcp-inspector node dist/index.js",
     "smoke:remote": "npm run build && node dist/smoke/smoke-remote-mcp.js",
-    "test:regression": "ts-node scripts/regression-runner.ts",
-    "test:regression:update": "ts-node scripts/regression-runner.ts --update",
-    "test:regression:ignore-ttl": "ts-node scripts/regression-runner.ts --ignore-cache-ttl",
+    "smoke:stdio": "npm run build && node scripts/smoke-stdio.mjs",
+    "test:regression": "npm run build && node scripts/regression-runner.mjs",
+    "test:regression:update": "npm run build && node scripts/regression-runner.mjs --update",
+    "test:regression:ignore-ttl": "npm run build && node scripts/regression-runner.mjs --ignore-cache-ttl",
+    "sync-corpus": "node scripts/sync-corpus.mjs",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

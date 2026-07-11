@@ -44,7 +44,16 @@ The server ships a bundled snapshot of the corpus at `corpus/<stack>/`, refreshe
 ## Transports
 
 - **stdio** (default, via `npx`) — runs locally in your MCP client.
-- **HTTP** — `npm run start` serves the same tools over HTTP for clients that connect by URL.
+- **HTTP** — `npm run start` serves the same tools over HTTP for clients that connect by URL. The HTTP endpoint is stateless (no session state to leak) and rate-limited. For any publicly reachable deployment, set `ALLOWED_HOSTS` and/or `ALLOWED_ORIGINS` (comma-separated) to enable Host/Origin validation (DNS-rebinding protection); it stays off with a warning until configured.
+
+  | Env var | Default | Purpose |
+  |---|---|---|
+  | `PORT` | `3000` | HTTP listen port. |
+  | `ALLOWED_HOSTS` | *(unset)* | Comma-separated allowlist of `Host` header values. |
+  | `ALLOWED_ORIGINS` | *(unset)* | Comma-separated allowlist of `Origin` header values. |
+  | `TRUST_PROXY` | `false` | Express `trust proxy`. Set to `1` (hop count) behind a single reverse proxy (e.g. Railway) so per-IP rate limiting uses the real client IP. Leave off when directly exposed; never `true`. |
+  | `RATE_LIMIT_MAX` | `120` | Max requests per IP per window. |
+  | `RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window in ms. |
 
 ## Development
 
@@ -56,6 +65,18 @@ npm run inspector    # MCP Inspector
 ```
 
 Override the corpus location with `PATTERN_REPO_PATH` (absolute, or relative to the package root) to develop against a live corpus checkout.
+
+### Refreshing the bundled corpus
+
+The package ships a snapshot of the corpus under `corpus/<stack>/`. Refresh it from a checkout of the corpus repo with:
+
+```bash
+npm run sync-corpus -- --source /path/to/accessibility-pattern-api
+# options: --stack web/react (default), --dry-run
+# or set A11Y_CORPUS_SOURCE instead of --source
+```
+
+It copies only the published read-slice — `patterns.json`, `global/global_rules.md`, and the components listed in `patterns.json` — into `corpus/<stack>/`. Membership is driven by `patterns.json`, so `status: draft` and `status: deprecated` components are excluded (a draft/deprecated member aborts the sync). The copied `patterns.json` records the source `catalog_revision`. Commit the resulting `corpus/` changes as part of the release.
 
 ## License
 

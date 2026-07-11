@@ -1,0 +1,7 @@
+{
+  "tool": "get_global_rules",
+  "args": {
+    "stack": "web/react",
+    "scope": ["component"]
+  }
+}

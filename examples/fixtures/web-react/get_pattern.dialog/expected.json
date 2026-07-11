@@ -1,0 +1,76 @@
+{
+  "cache_ttl_seconds": 86400,
+  "contract_version": "1.0",
+  "pattern": {
+    "aliases": [
+      "dialog",
+      "modal",
+      "pop-up"
+    ],
+    "id": "dialog.modal",
+    "sections": {
+      "acceptance_checks": [
+        "On open:\n  - Focus moves into the dialog.\n  - Dialog is announced with its accessible name.\n  - Background content is not reachable by keyboard or screen reader.\n  - Body scroll is prevented.",
+        "While open:\n  - Tab and Shift+Tab remain within the dialog.\n  - Escape closes the dialog.\n  - Clicking the backdrop closes the dialog (unless the pattern has intentionally opted out per Customizable → Backdrop click contract).\n  - Clicking inside the dialog content does not close it.\n  - Focus indicators on all interactive elements follow the Foundations focus rule.",
+        "On close:\n  - Focus returns to the invoking element.\n  - Background content becomes interactive again.\n  - Body scroll is restored.",
+        "Semantics:\n  - Dialog has an accessible name.\n  - Close button has an accessible name.\n  - Under native `<dialog>` + `.showModal()`, the modal state is conveyed by the top-layer/modal contract; under the manual fallback, `aria-modal=\"true\"` is set explicitly.\n  - The invoking control declares dialog-trigger semantics (e.g., `aria-haspopup=\"dialog\"`).",
+        "Reflow:\n  - At 400% browser zoom (~320 CSS pixels wide), dialog content reflows within the viewport without horizontal scrolling."
+      ],
+      "customizable": [
+        "**Manual `<div role=\"dialog\">` fallback** when native `<dialog>` cannot be used (portal / stacking-context conflicts, legacy target matrix). Implement all six behaviors by hand: `aria-modal=\"true\"`, focus trap, `inert` on the app content root (never `body` or `documentElement`), body scroll lock (on iOS Safari use `position: fixed; top: -${scrollY}px`), Escape listener, focus restoration, and render via portal to `document.body`.",
+        "**Backdrop click closes** by default; may be intentionally disabled for destructive confirmations so users must Cancel or Confirm explicitly.",
+        "**Initial focus target** — three acceptable defaults:\n  - the dialog surface (`tabIndex={-1}`) — accessible name announces, then Tab to first control (default under `.showModal()`);\n  - a safe-default control (Cancel / Close) for destructive confirmations, to prevent inadvertent Enter-confirm;\n  - the first interactive element for form-shaped dialogs.",
+        "**`<form method=\"dialog\">`** may be used for zero-JS form dismiss — the submit button's `value` becomes `dialog.returnValue` on the `close` event."
+      ],
+      "do_not_use_when": [
+        "Do not use when the content is part of the normal page flow and does not block background interaction.",
+        "Do not use when presenting brief, non-blocking status messages that do not require focus movement (use `toast` or `snackbar`).",
+        "Do not use when the message is urgent and requires immediate acknowledgment (use `dialog.alert`).",
+        "Do not use when the interaction involves complex, multi-step workflows spanning multiple screens."
+      ],
+      "donts": [
+        "Do not render `<dialog>` without calling `.showModal()` and expect modal behavior. A bare `<dialog>` produces a non-modal reveal with none of the modal contract.",
+        "Do not implement the manual `<div role=\"dialog\">` fallback without every one of its Must Haves. Partial implementations produce broken screen-reader announcements and stranded focus.",
+        "Do not rely on `aria-modal=\"true\"` to block background interaction; it is announcement metadata, not an interaction gate. Background isolation is a separate implementation concern.",
+        "Do not render the manual fallback inside containers that create clipping or stacking contexts (e.g., `overflow: hidden/auto`, `transform`), and do not rely on `z-index` alone to \"make it work.\"",
+        "Do not inert `document.body` or `document.documentElement` on the manual fallback; inert only the application content root.",
+        "Do not omit focus restoration; closing a dialog must return the user to the element that invoked it.",
+        "Do not set fixed pixel widths on the dialog surface that exceed the 320-CSS-pixel viewport at 400% zoom."
+      ],
+      "golden_pattern": "Structural reference for AI coding assistants — semantics, focus, and keyboard behavior. Styling, copy, and demo data are illustrative.\n\n```jsx\n\"use client\";\n\nexport function ModalDialog({\n  open,\n  title,\n  description,\n  onClose,\n  children,\n}) {\n  const dialogRef = useRef(null);\n  const titleId = useId();\n\n  // Open / close the native dialog imperatively when `open` changes.\n  // .showModal() is what produces the modal contract: focus trap, background\n  // inertness, Escape dismissal, focus restoration, and top-layer rendering.\n  useEffect(() => {\n    const el = dialogRef.current;\n    if (!el) return;\n    if (open && !el.open) el.showModal();\n    if (!open && el.open) el.close();\n  }, [open]);\n\n  // Route the browser's `cancel` (Escape) and `close` events through onClose\n  // so callers see a single close pathway. preventDefault on `cancel` lets\n  // the effect above handle el.close() for consistency.\n  useEffect(() => {\n    const el = dialogRef.current;\n    if (!el) return;\n    const handleCancel = (e) => {\n      e.preventDefault();\n      onClose();\n    };\n    const handleClose = () => onClose();\n    el.addEventListener(\"cancel\", handleCancel);\n    el.addEventListener(\"close\", handleClose);\n    return () => {\n      el.removeEventListener(\"cancel\", handleCancel);\n      el.removeEventListener(\"close\", handleClose);\n    };\n  }, [onClose]);\n\n  // Backdrop click closes. A click that lands on the <dialog> element itself\n  // (not on a content descendant) is a click on the padding around the\n  // content — treat that as a backdrop dismiss.\n  const handleClick = (e) => {\n    if (e.target === dialogRef.current) onClose();\n  };\n\n  return (\n    <dialog\n      ref={dialogRef}\n      aria-labelledby={titleId}\n      onClick={handleClick}\n      style={{\n        maxWidth: \"min(560px, 100%)\",\n        border: 0,\n        borderRadius: 12,\n        padding: 16,\n      }}\n    >\n      <div\n        style={{\n          display: \"flex\",\n          justifyContent: \"space-between\",\n          alignItems: \"flex-start\",\n          gap: 12,\n        }}\n      >\n        <div style={{ minWidth: 0 }}>\n          <h2 id={titleId} style={{ margin: 0 }}>\n            {title}\n          </h2>\n          {description ? (\n            <p style={{ marginTop: 8, marginBottom: 0 }}>{description}</p>\n          ) : null}\n        </div>\n\n        <button\n          type=\"button\"\n          onClick={onClose}\n          aria-label=\"Close dialog\"\n          style={{\n            width: 36,\n            height: 36,\n            borderRadius: 8,\n            border: \"1px solid rgba(0,0,0,0.2)\",\n            background: \"transparent\",\n            display: \"inline-grid\",\n            placeItems: \"center\",\n            lineHeight: 1,\n            cursor: \"pointer\",\n            flex: \"0 0 auto\",\n          }}\n        >\n          <span aria-hidden=\"true\" style={{ fontSize: 18 }}>\n            ×\n          </span>\n        </button>\n      </div>\n\n      <div style={{ marginTop: 16 }}>{children}</div>\n    </dialog>\n  );\n}\n```",
+      "must_haves": [
+        "Use the native `<dialog>` element (preferred). When `<dialog>` cannot be used, `<div role=\"dialog\">` is the documented fallback — see Customizable → Manual fallback.",
+        "**Open with `.showModal()`, close with `.close()`.** A `<dialog>` present in the DOM without `.showModal()` is non-modal — no focus trap, no background inertness, no `aria-modal`, no top-layer rendering. Unmounting a `<dialog>` while open (rather than calling `.close()`) leaves focus stranded because the browser's focus-restoration to the invoker runs on `.close()` (or on the browser's implicit `.close()` from Esc's `cancel` event and from `<form method=\"dialog\">` submits). Both lifecycle endpoints must be exercised.",
+        "Dialog surface has an accessible name via `aria-labelledby` (preferred) or `aria-label`. If `aria-labelledby` is used, it references a visible title element (e.g., `<h2 id=\"...\">`).",
+        "If a description is rendered, it is referenced by `aria-describedby`. Do not rely on incidental reading order.",
+        "Dialog width is fluid so content reflows at 400% zoom (WCAG 1.4.10 Reflow). Prefer `max-width: min(<Npx>, 100%)`; do not set fixed pixel widths that would exceed the 320-CSS-pixel viewport at 400% zoom.",
+        "Provide a visible close control (`<button type=\"button\">`) with an accessible name (e.g., `aria-label=\"Close dialog\"`).",
+        "The invoking control declares dialog-trigger semantics — apply `aria-haspopup=\"dialog\"` to the trigger element.",
+        "The dialog satisfies the following behavior contract (all six required):\n  - Focus moves into the dialog on open.\n  - Focus is trapped within the dialog while open.\n  - Escape closes the dialog.\n  - Focus returns to the invoking element on close.\n  - Background content is not focusable or reachable by keyboard or screen readers while open.\n  - Body scroll is prevented while open.",
+        "Under native `<dialog>` + `.showModal()` (the Golden Pattern), these six behaviors are provided automatically by the browser. Under the manual `<div role=\"dialog\">` fallback (Customizable → Manual fallback), each is the implementation's responsibility.",
+        "Focus indicators on the dialog surface, close button, and any focusable content follow the [Foundations focus rule](/web/react/foundations#rule-focus-states)."
+      ],
+      "use_when": [
+        "Use when content appears in an overlay that blocks interaction with the underlying page.",
+        "Use when keyboard focus must move into the dialog and remain contained until dismissal.",
+        "Use when the user must explicitly complete or dismiss the dialog before returning to the main interface."
+      ]
+    },
+    "source": {
+      "relative_path": "web/react/components/dialog.modal.md"
+    },
+    "stack": "web/react",
+    "status": "beta",
+    "summary": "User-initiated blocking dialog. Uses the native <dialog> element with .showModal() so the browser handles focus trap, background inertness, Escape dismissal, focus restoration, and top-layer rendering.",
+    "tags": [
+      "dialog",
+      "modal",
+      "pop-up",
+      "overlay",
+      "focus-trap",
+      "blocking",
+      "native-dialog",
+      "show-modal"
+    ]
+  }
+}

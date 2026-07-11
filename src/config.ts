@@ -10,7 +10,10 @@ export type AppConfig = {
   patternRepoPath: string;
 
   /**
-   * Default cache TTL (seconds) we tell clients they can keep responses.
+   * Client-facing cache hint (seconds): the `cache_ttl_seconds` we advertise on
+   * every response so clients know how long they may keep it. This is NOT a
+   * server-side rebuild interval — the bundled corpus is a lazy singleton built
+   * once per process (see repo/cache.ts).
    */
   cacheTtlSeconds: number;
 };
@@ -20,7 +23,7 @@ export type AppConfig = {
 // This file compiles to dist/config.js, so its dir is dist/ and the package
 // root is one level up; in dev (ts-node on src/config.ts) it resolves the same.
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
-const PACKAGE_ROOT = path.resolve(MODULE_DIR, "..");
+export const PACKAGE_ROOT = path.resolve(MODULE_DIR, "..");
 
 // Canonical server identity, read once from package.json so both transports
 // (stdio and HTTP) advertise the same name and version in the MCP handshake.
@@ -43,6 +46,8 @@ export function getConfig(): AppConfig {
     ? repoPathFromEnv
     : path.resolve(PACKAGE_ROOT, repoPathFromEnv);
 
+  // Advertised to clients as `cache_ttl_seconds`; does not drive any server-side
+  // rebuild (the index is a process-lifetime singleton).
   const cacheTtlSeconds = process.env.CACHE_TTL_SECONDS
     ? Number(process.env.CACHE_TTL_SECONDS)
     : 60 * 60; // 1 hour default
